@@ -12,11 +12,12 @@ float*  homography(float* a, float* b){
 }
 
 float* randHomography(float* h){
+	float scale = 0.00001;
 	float * temp = new float[9]
 	srand (time(NULL));
-	int offset;
+	float offset;
 	for(int i=0;i<9;++i){
-		offset = (rand() % 200 - 100) * 0.00001;
+		offset = (rand() % 200 - 100) * scale;
 		h[i] += offset;
 	}
 	return temp;
