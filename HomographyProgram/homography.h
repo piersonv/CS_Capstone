@@ -20,15 +20,17 @@ float*  homography(int x, int y, float* b){
 
 double*  homography(int x, int y, double* b){
   double * temp = new double[2];
-  temp[0] = x*b[0] + y*b[1] + b[2];
-  temp[1] = x*b[3] + y*b[4] + b[5];
+  double divide = x*b[6] + y*b[7] + b[8];
+  temp[0] = (x*b[0] + y*b[1] + b[2]) / divide;
+  temp[1] = (x*b[3] + y*b[4] + b[5]) / divide;
   return temp;
 }
 
 double*  homography(double x, double y, double* b){
   double * temp = new double[2];
-  temp[0] = x*b[0] + y*b[1] + b[2];
-  temp[1] = x*b[3] + y*b[4] + b[5];
+  double divide = x*b[6] + y*b[7] + b[8];
+  temp[0] = (x*b[0] + y*b[1] + b[2]) / divide;
+  temp[1] = (x*b[3] + y*b[4] + b[5]) / divide;
   return temp;
 }
 float* randHomography(float* h){

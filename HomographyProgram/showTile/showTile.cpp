@@ -13,25 +13,29 @@ int main(int argc, char **argv)
   //  vector<PixelLoc> in = getPixelsFor(sp[i]);
   // get locations of all pixels in a contour
   Matrix3x3 myH1 = getHomography("205leesn", "1098R", "1098L");
-  Matrix3x3 myH2 = getHomography("205leesn", "1098L", "1098R");
+  //Matrix3x3 myH2 = getHomography("205leesn", "1098L", "1098R");
   //Matrix3x3 myH = getHomography("169npa3", "1194R", "1194L");
   cerr << "homography: " << myH1 << endl; 
-  cerr << "homography: " << myH2 << endl; 
-
+  //cerr << "homography: " << myH2 << endl; 
+  Image myimg("1098L");
+  Image imgR = getContourColors("205leesn", "1098R");  
   vector<PixelLoc> interiorL = getContour("205leesn", "1098R");
   double *point;
+  vector<Color> intcolors;
+  vector<Color> intcolors2;
   for(unsigned int i=0; i<interiorL.size(); ++i){
 	point = homography(interiorL[i].x + 0.5 , interiorL[i].y + 0.5, myH1.m);
 	Coord mycoord(point[0], point[1]);
-	//cerr << point[0] <<" "<<point[1] << endl;
+	intcolors2.push_back(imgR.getPixel(interiorL[i]));
+	intcolors.push_back(asInterpolatedColor(mycoord, &myimg));
   }
+ 
   //cerr << "interior.size() " << interior.size() << " interior[0] " << interior[0] << " interior.back() " << interior.back() << endl;
   // get raw boundary locations
   //vector< vector<Coord> > boundary = getContourBoundary("135leesn", "1098L");
   //cerr << "boundary.size() " << boundary.size() << " boundary[0][0] " << boundary[0][0] << endl;
   // get the colors of (almost all) pixels in a contour
-  Image imgL = getContourColors("169npa3", "1194L");
-  Image imgR = getContourColors("169npa3", "1194R");
+  // Image imgR = getContourColors("205leesn", "1098R");
   //img.print("out.ppm");
   // get feature points associated with a given tile
   //vector<Coord> pt = getFeaturePoints("135leesn", "1098L");
