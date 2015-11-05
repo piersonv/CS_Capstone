@@ -1,6 +1,7 @@
 // by Olaf Hall-Holt, 2007-2015
 #include"eriolHeader.h"
 #include"../homography.h"
+#include"NCCdemo.h"
 Tile &loadJustOneTile(const string &tileID, const string &imgName);
 vector<PixelLoc> getPixelsFor(int);
 
@@ -30,6 +31,7 @@ int main(int argc, char **argv)
 	intcolors.push_back(asInterpolatedColor(mycoord, &myimg));
   }
  
+  calculate_normalized_correlation( 
   //cerr << "interior.size() " << interior.size() << " interior[0] " << interior[0] << " interior.back() " << interior.back() << endl;
   // get raw boundary locations
   //vector< vector<Coord> > boundary = getContourBoundary("135leesn", "1098L");
