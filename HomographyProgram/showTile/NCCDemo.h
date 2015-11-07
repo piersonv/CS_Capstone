@@ -31,90 +31,55 @@ void print_array(const vector<int> & signal)
 	cout << endl;
 }
 
-int calculate_correlation(const int & size_of_signal, const vector<int> & first_signal, const vector<int> & second_signal)
-{
-	//Right now signals have to be the same size.
-	int signal_correlation = 0;
+//########################Color Functions#################################
 
-	for (int count = 0; count < size_of_signal; count++)
-	{
-		signal_correlation += first_signal[count]*second_signal[count];
-	}
+double calculate_correlation(const vector<Color> & first_signal, const vector<Color> & second_signal)
 
-	return signal_correlation;
-
-}
-
-float calculate_correlation(const int & size_of_signal, const vector<float> & first_signal, const vector<float> & second_signal)
-
-{
-	//Right now signals have to be the same size.
-	float signal_correlation = 0;
-
-	for (int count = 0; count < size_of_signal; count++)
-	{
-		signal_correlation += first_signal[count]*second_signal[count];
-	}
-
-	return signal_correlation;
-
-}
-
-float calculate_normalized_correlation(const vector<int> & first_signal, const vector<int> & second_signal)
 {
 	int size_of_signal = first_signal.size();
-	int correlation = calculate_correlation(size_of_signal, first_signal, second_signal);
-	int sum_first_signal = 0;
-	int sum_second_signal = 0;
-	int correlation_scalar = 0;
+	//cerr << size_of_signal << endl;
+	//Right now signals have to be the same size.
+	double signal_correlationR = 0;
+	double signal_correlationG = 0;
+	double signal_correlationB = 0;
 
 	for (int count = 0; count < size_of_signal; count++)
 	{
-		sum_first_signal += first_signal[count] * first_signal[count];
-		sum_second_signal += second_signal[count] * second_signal[count];
+		signal_correlationR += first_signal[count].r*second_signal[count].r;
+		//cerr << first_signal[count] << endl;
+		signal_correlationG += first_signal[count].g*second_signal[count].g;
+		signal_correlationB += first_signal[count].b*second_signal[count].b;
 	}
-
-	correlation_scalar = sqrt(sum_first_signal*sum_second_signal);
-
-	return (float)correlation/correlation_scalar;
-
-}
-
-double calculate_normalized_correlation(const vector<double> & first_signal, const vector<double> & second_signal)
-{
-	int size_of_signal = first_signal.size();
-	double correlation = calculate_correlation(size_of_signal, first_signal, second_signal);
-	double sum_first_signal = 0;
-	double sum_second_signal = 0;
-	int correlation_scalar = 0;
-
-	for (int count = 0; count < size_of_signal; count++)
-	{
-		sum_first_signal += first_signal[count] * first_signal[count];
-		sum_second_signal += second_signal[count] * second_signal[count];
-	}
-
-	correlation_scalar = sqrt(sum_first_signal*sum_second_signal);
-
-	return (double)correlation/correlation_scalar;
+	//cerr << signal_correlationR << endl;
+	return (signal_correlationR+signal_correlationG+signal_correlationB)/3;
 
 }
 
 double calculate_normalized_correlation(const vector<Color> & first_signal, const vector<Color> & second_signal)
 {
 	int size_of_signal = first_signal.size();
-	double correlation = calculate_correlation(size_of_signal, first_signal, second_signal);
-	double sum_first_signal = 0;
-	double sum_second_signal = 0;
+	double correlation = calculate_correlation(first_signal, second_signal);
+	//cerr << correlation << endl;
+	double sum_first_signalR = 0;
+	double sum_second_signalR = 0;
+	double sum_first_signalG = 0;
+	double sum_second_signalG = 0;
+	double sum_first_signalB = 0;
+	double sum_second_signalB = 0;
 	int correlation_scalar = 0;
 
 	for (int count = 0; count < size_of_signal; count++)
 	{
-		sum_first_signal += first_signal[count] * first_signal[count];
-		sum_second_signal += second_signal[count] * second_signal[count];
+		sum_first_signalR += first_signal[count].r * first_signal[count].r;
+		sum_second_signalR += second_signal[count].r * second_signal[count].r;
+		sum_first_signalG += first_signal[count].g * first_signal[count].g;
+		sum_second_signalG += second_signal[count].g * second_signal[count].g;
+		sum_first_signalB += first_signal[count].b * first_signal[count].b;
+		sum_second_signalB += second_signal[count].b * second_signal[count].b;
 	}
-
-	correlation_scalar = sqrt(sum_first_signal*sum_second_signal);
+	double total_sum1 = (sum_first_signalR + sum_first_signalG + sum_first_signalB) / 3; 
+	double total_sum2 = (sum_second_signalR + sum_second_signalG + sum_second_signalB) / 3; 
+	correlation_scalar = sqrt(total_sum1*total_sum2);
 
 	return (double)correlation/correlation_scalar;
 
