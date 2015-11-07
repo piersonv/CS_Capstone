@@ -30,27 +30,35 @@ void print_array(const vector<int> & signal)
 	cout << endl;
 }
 
-int calculate_correlation(const int & size_of_signal, const vector<int> & first_signal, const vector<int> & second_signal)
+vector<int> calculate_correlation(const int & size_of_signal, const vector<Color> & first_signal, const vector<Color> & second_signal)
 {
 	//Right now signals have to be the same size.
-	int signal_correlation = 0;
+  vector<int> signal_correlation [3];
 
 	for (int count = 0; count < size_of_signal; count++)
 	{
-		signal_correlation += first_signal[count]*second_signal[count];
+	  signal_correlation[0] += first_signal[count].red*second_signal[count].red; //red channel
+	  signal_correlation[1] += first_signal[count].blue*second_signal[count].blue; //blue channel
+	  signal_correlation[2] += first_signal[count].green*second_signal[count].green; //green channel
 	}
 
 	return signal_correlation;
 
 }
 
-float calculate_normalized_correlation(const vector<int> & first_signal, const vector<int> & second_signal)
+float calculate_normalized_correlation(const vector<Color> & first_signal, const vector<Color> & second_signal)
 {
 	int size_of_signal = first_signal.size();
-	int correlation = calculate_correlation(size_of_signal, first_signal, second_signal);
-	int sum_first_signal = 0;
-	int sum_second_signal = 0;
-	int correlation_scalar = 0;
+	vector<int> correlation = calculate_correlation(size_of_signal, first_signal, second_signal);
+	int sum_first_signal_red = 0;
+	int sum_first_signal_blue = 0;
+	int sum_first_signal_green = 0;
+	int sum_second_signal_red = 0;
+	int sum_second_signal_blue = 0;
+	int sum_second_signal_green = 0;
+	int correlation_scalar_red = 0;
+	int correlation_scalar_blue = 0;
+	int correlation_scalar_green = 0;
 
 	for (int count = 0; count < size_of_signal; count++)
 	{
@@ -58,9 +66,12 @@ float calculate_normalized_correlation(const vector<int> & first_signal, const v
 		sum_second_signal += second_signal[count] * second_signal[count];
 	}
 
-	correlation_scalar = sqrt(sum_first_signal*sum_second_signal);
+	correlation_scalar_red = sqrt(sum_first_signal_red*sum_second_signal_red);
+	correlation_scalar_blue = sqrt(sum_first_signal_blue*sum_second_signal_blue);
+	correlation_scalar_blue = sqrt(sum_first_signal_green*sum_second_signal_blue);
+	
 
-	return (float)correlation/correlation_scalar;
+	return (float)(correlation.red/correlation_scalar_red;
 
 }
 
@@ -73,7 +84,7 @@ int main()
 	cout << "Please Enter first signal array: ";
 	allocate_array(first_signal);
 
-	cout << "Please Enter second signal array: ";
+ 	cout << "Please Enter second signal array: ";
 
 	allocate_array(second_signal);
 
