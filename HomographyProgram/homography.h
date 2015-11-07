@@ -4,44 +4,22 @@
 #include <iostream>
 #include <time.h>
 #include <stdlib.h>
-float*  homography(float* a, float* b){
-  float * temp = new float[2];
-  temp[0] = a[0]*b[0] + a[1]*b[1] + b[2];
-  temp[1] = a[0]*b[3] + a[1]*b[4] + b[5];
-  return temp;
-}
 
-float*  homography(int x, int y, float* b){
-  float * temp = new float[2];
-  temp[0] = x*b[0] + y*b[1] + b[2];
-  temp[1] = x*b[3] + y*b[4] + b[5];
-  return temp;
-}
-
-double*  homography(int x, int y, double* b){
-  double * temp = new double[2];
+// homography(x coord, y coord, homography, point)
+void homography(double x, double y, double* b, double *c){
   double divide = x*b[6] + y*b[7] + b[8];
-  temp[0] = (x*b[0] + y*b[1] + b[2]) / divide;
-  temp[1] = (x*b[3] + y*b[4] + b[5]) / divide;
-  return temp;
+  c[0] = (x*b[0] + y*b[1] + b[2]) / divide;
+  c[1] = (x*b[3] + y*b[4] + b[5]) / divide;
 }
 
-double*  homography(double x, double y, double* b){
-  double * temp = new double[2];
-  double divide = x*b[6] + y*b[7] + b[8];
-  temp[0] = (x*b[0] + y*b[1] + b[2]) / divide;
-  temp[1] = (x*b[3] + y*b[4] + b[5]) / divide;
-  return temp;
-}
-double* randHomography(double* h, time_t now, double scale=0.00001){
-	double * temp = new double[9];
-	srand (now);
-	double offset;
-	for(int i=0;i<9;++i){
-		offset = (rand() % 200 - 100) * scale;
-		temp[i] = h[i] + offset;
-	}
-	return temp;
+//randHomography(base homography, result homography, rand seed, scale)
+void randHomography(double* h, double* temp, long now, double scale=0.00001){
+        srand (now);
+        double offset;
+        for(int i=0;i<9;++i){
+                offset = (rand() % 200 - 100) * scale;
+                temp[i] = h[i] + offset;
+        }
 }
 
 #endif
