@@ -10,6 +10,10 @@ vector<PixelLoc> getPixelsFor(int);
 
 int main(int argc, char **argv)
 {
+  string tile = argv[1];
+  string image = argv[2];
+  string imageR = image+"R";
+  string imageL = image+"L";
   double point[2];
   vector<Color> intcolors;
   vector<Color> intcolors2;
@@ -19,14 +23,14 @@ int main(int argc, char **argv)
   float bestncc = -2;
   float first;
 
-  Matrix3x3 myH1 = getHomography("205leesn", "1098R", "1098L");
+  Matrix3x3 myH1 = getHomography(tile, imageR, imageL);
   cerr << "homography: " << myH1 << endl; 
   for(int i=0;i<9;++i){
 	current[i] = myH1.m[i];
   }  
-  Image myimg("1098L");
-  Image myimgR("1098R");
-  vector<PixelLoc> interiorL = getContour("205leesn", "1098R");
+  Image myimg(imageL.c_str());
+  Image myimgR(imageR.c_str());
+  vector<PixelLoc> interiorL = getContour(tile, imageR);
 
   for(int j=0; j<2000; ++j){
   	for(unsigned int i=0; i<interiorL.size(); ++i){
@@ -53,7 +57,9 @@ int main(int argc, char **argv)
 		}
 		j=0;
 	 }
-         randHomography(best, current, (long)time(NULL) + j, 0.000001);
+	 long seed = (long)time(NULL) + j;
+	 cout << seed << endl;
+         randHomography(best, current, seed, 0.000001);
  	 intcolors.clear();
  	 intcolors2.clear();
          }
