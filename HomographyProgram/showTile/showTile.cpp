@@ -1,7 +1,7 @@
 // by Olaf Hall-Holt, 2007-2015
 #include"eriolHeader.h"
 #include"../homography.h"
-#include"NCCdemo.h"
+#include"NCCDemo.h"
 Tile &loadJustOneTile(const string &tileID, const string &imgName);
 vector<PixelLoc> getPixelsFor(int);
 
@@ -19,6 +19,7 @@ int main(int argc, char **argv)
   cerr << "homography: " << myH1 << endl; 
   //cerr << "homography: " << myH2 << endl; 
   Image myimg("1098L");
+  cerr << myimg.getHeight() << " " << myimg.getWidth() << endl;
   Image imgR = getContourColors("205leesn", "1098R");  
   vector<PixelLoc> interiorL = getContour("205leesn", "1098R");
   double *point;
@@ -27,11 +28,18 @@ int main(int argc, char **argv)
   for(unsigned int i=0; i<interiorL.size(); ++i){
 	point = homography(interiorL[i].x + 0.5 , interiorL[i].y + 0.5, myH1.m);
 	Coord mycoord(point[0], point[1]);
+	PixelLoc myloc((int)point[0], (int)point[1]);
+	if (point[0] < myimg.getWidth() && point[1] < myimg.getHeight()){
+            //intcolors.push_back(asInterpolatedColor(mycoord, &myimg));
+            intcolors.push_back(myimg.getPixel(myloc));
+	} else {
+		cerr << mycoord << endl;
+		continue;
+	}
 	intcolors2.push_back(imgR.getPixel(interiorL[i]));
-	intcolors.push_back(asInterpolatedColor(mycoord, &myimg));
   }
  
-  calculate_normalized_correlation( 
+  cout << calculate_normalized_correlation(intcolors, intcolors2) << endl; 
   //cerr << "interior.size() " << interior.size() << " interior[0] " << interior[0] << " interior.back() " << interior.back() << endl;
   // get raw boundary locations
   //vector< vector<Coord> > boundary = getContourBoundary("135leesn", "1098L");
