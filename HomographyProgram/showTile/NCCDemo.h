@@ -37,7 +37,7 @@ double calculate_correlation(const vector<Color> & first_signal, const vector<Co
 
 {
 	int size_of_signal = first_signal.size();
-	cerr << size_of_signal << endl;
+	//cerr << size_of_signal << endl;
 	//Right now signals have to be the same size.
 	double signal_correlationR = 0;
 	double signal_correlationG = 0;
@@ -46,11 +46,11 @@ double calculate_correlation(const vector<Color> & first_signal, const vector<Co
 	for (int count = 0; count < size_of_signal; count++)
 	{
 		signal_correlationR += first_signal[count].r*second_signal[count].r;
-		cerr << first_signal[count] << endl;
+		//cerr << first_signal[count] << endl;
 		signal_correlationG += first_signal[count].g*second_signal[count].g;
 		signal_correlationB += first_signal[count].b*second_signal[count].b;
 	}
-	cerr << signal_correlationR << endl;
+	//cerr << signal_correlationR << endl;
 	return (signal_correlationR+signal_correlationG+signal_correlationB)/3;
 
 }
@@ -59,7 +59,7 @@ double calculate_normalized_correlation(const vector<Color> & first_signal, cons
 {
 	int size_of_signal = first_signal.size();
 	double correlation = calculate_correlation(first_signal, second_signal);
-	cerr << correlation << endl;
+	//cerr << correlation << endl;
 	double sum_first_signalR = 0;
 	double sum_second_signalR = 0;
 	double sum_first_signalG = 0;

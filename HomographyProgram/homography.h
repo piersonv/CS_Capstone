@@ -33,11 +33,10 @@ double*  homography(double x, double y, double* b){
   temp[1] = (x*b[3] + y*b[4] + b[5]) / divide;
   return temp;
 }
-float* randHomography(float* h){
-	float scale = 0.0001;
-	float * temp = new float[9];
-	srand (time(NULL));
-	float offset;
+double* randHomography(double* h, time_t now, double scale=0.00001){
+	double * temp = new double[9];
+	srand (now);
+	double offset;
 	for(int i=0;i<9;++i){
 		offset = (rand() % 200 - 100) * scale;
 		temp[i] = h[i] + offset;
