@@ -22,6 +22,8 @@ int main(int argc, char **argv)
   float ncc;
   float bestncc = -2;
   float first;
+  double scale = 1;
+  bool initial = true;
 
   Matrix3x3 myH1 = getHomography(tile, imageR, imageL);
   cerr << "homography: " << myH1 << endl; 
@@ -32,7 +34,9 @@ int main(int argc, char **argv)
   Image myimgR(imageR.c_str());
   vector<PixelLoc> interiorL = getContour(tile, imageR);
 
-  for(int j=0; j<2000; ++j){
+  for(int k=10; k < 100000; k*=10){
+  cout << "Trying with scale = " << scale/k << endl;
+  for(int j=0; j<20000; ++j){
   	for(unsigned int i=0; i<interiorL.size(); ++i){
 		homography(interiorL[i].x + 0.5 , interiorL[i].y + 0.5, current, point);
 		Coord mycoord(point[0], point[1]);
@@ -44,26 +48,34 @@ int main(int argc, char **argv)
 		intcolors2.push_back(myimgR.getPixel(interiorL[i]));
  	 }
  	 ncc = calculate_normalized_correlation(intcolors, intcolors2);
- 	 if (j==0){
+ 	 if (initial){
 		first = ncc;
- 	 }
+ 	  	initial = false;
+		cout << "Initial: " << first << endl;
+	 }
 //	 if (j%22 == 0)
 //		cerr << ncc << endl;
 	 if (ncc > bestncc){
-		cout << "Found better: " << ncc << endl;
+		//cout << "Found better: " << ncc << endl;
 		bestncc = ncc;
 		for(int i=0;i<9;++i){
 			best[i] = current[i];
 		}
 		j=0;
 	 }
-	 long seed = (long)time(NULL) + j;
-	 cout << seed << endl;
-         randHomography(best, current, seed, 0.000001);
+	 long seed = (long)time(NULL) * j;
+	 //cout << seed << endl;
+         randHomography(best, current, seed, scale/k);
  	 intcolors.clear();
  	 intcolors2.clear();
          }
-
+ cout << "Best so far: " << bestncc << endl;
+ cout << "homography: ";
+ for(int i=0;i<9;++i){
+        cout << best[i] << " ";
+ }
+ cout << endl;
+ }
  cout << "First: " << first << " Best: " << bestncc << endl;
  cout << "homography: "; 
  for(int i=0;i<9;++i){
