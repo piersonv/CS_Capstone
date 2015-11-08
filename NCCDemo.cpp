@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
+#include "eriolHeader.h"
 using namespace std;
 
 void allocate_array(vector<int> & array_signal)
@@ -30,10 +31,10 @@ void print_array(const vector<int> & signal)
 	cout << endl;
 }
 
-vector<int> calculate_correlation(const int & size_of_signal, const vector<Color> & first_signal, const vector<Color> & second_signal)
+int * calculate_correlation(const int & size_of_signal, const vector<Color> & first_signal, const vector<Color> & second_signal)
 {
 	//Right now signals have to be the same size.
-  vector<int> signal_correlation [3];
+  int * signal_correlation = (int *) malloc(3*sizeof(int));
 
 	for (int count = 0; count < size_of_signal; count++)
 	{
@@ -62,8 +63,14 @@ float calculate_normalized_correlation(const vector<Color> & first_signal, const
 
 	for (int count = 0; count < size_of_signal; count++)
 	{
-		sum_first_signal += first_signal[count] * first_signal[count];
-		sum_second_signal += second_signal[count] * second_signal[count];
+		sum_first_signal_red += first_signal[count].red * first_signal[count].red;
+		sum_second_signal_red += second_signal[count].red * second_signal[count].red;
+
+		sum_first_signal_blue += first_signal[count].blue * first_signal[count].blue;
+		sum_second_signal_blue += second_signal[count].blue * second_signal[count].blue;
+
+		sum_first_signal_green += first_signal[count].green * first_signal[count].green;
+		sum_second_signal_green += second_signal[count].green * second_signal[count].green;
 	}
 
 	correlation_scalar_red = sqrt(sum_first_signal_red*sum_second_signal_red);
@@ -71,22 +78,16 @@ float calculate_normalized_correlation(const vector<Color> & first_signal, const
 	correlation_scalar_blue = sqrt(sum_first_signal_green*sum_second_signal_blue);
 	
 
-	return (float)(correlation.red/correlation_scalar_red;
+	return (float)((correlation[0]/correlation_scalar_red) 
+		* (correlation[1]/correlation_scalar_blue) * (correlation[2]/correlation_scalar_green))/3;
 
 }
 
 int main()
 {
-	vector<int> first_signal;
-	vector<int> second_signal;
+	vector<Color> first_signal;
+	vector<Color> second_signal;
 	float normalized_correlation;
-
-	cout << "Please Enter first signal array: ";
-	allocate_array(first_signal);
-
- 	cout << "Please Enter second signal array: ";
-
-	allocate_array(second_signal);
 
 	normalized_correlation = calculate_normalized_correlation(first_signal, second_signal);
 
