@@ -25,27 +25,46 @@ int main(int argc, char **argv)
   double scale = 1;
   bool initial = true;
 
-  Matrix3x3 myH1 = getHomography(tile, imageR, imageL);
+  vector<PixelLoc> interiorR = getContour(tile, imageR);
+  vector<PixelLoc> interiorL = getContour(tile, imageL);
+
+   Matrix3x3 myH1;
+   vector<PixelLoc> interior;
+   Image myimg;
+   Image myimgOther;
+
+  if (interiorR.size() > interiorL.size())
+  {
+    interior = getContour(tile, imageL);
+    myH1  = getHomography(tile, imageL, imageR);
+    myimg = imageR.c_str();
+    myimgOther = imageL.c_str();
+  }
+  else
+  {
+    interior = getContour(tile, imageR);
+     myH1  = getHomography(tile, imageR, imageL);
+    myimg = imageL.c_str();
+    myimgOther = imageR.c_str();
+  }
+
   cerr << "homography: " << myH1 << endl; 
   for(int i=0;i<9;++i){
 	current[i] = myH1.m[i];
   }  
-  Image myimg(imageL.c_str());
-  Image myimgR(imageR.c_str());
-  vector<PixelLoc> interiorL = getContour(tile, imageR);
 
   for(int k=10; k < 100000; k*=10){
   cout << "Trying with scale = " << scale/k << endl;
   for(int j=0; j<20000; ++j){
-  	for(unsigned int i=0; i<interiorL.size(); ++i){
-		homography(interiorL[i].x + 0.5 , interiorL[i].y + 0.5, current, point);
+  	for(unsigned int i=0; i<interior.size(); ++i){
+		homography(interior[i].x + 0.5 , interior[i].y + 0.5, current, point);
 		Coord mycoord(point[0], point[1]);
 		if (point[0] < myimg.getWidth() && point[1] < myimg.getHeight()){
 	            intcolors.push_back(asInterpolatedColor(mycoord, &myimg));
 		} else {
 			continue;
 		}
-		intcolors2.push_back(myimgR.getPixel(interiorL[i]));
+		intcolors2.push_back(myimgOther.getPixel(interior[i]));
  	 }
  	 ncc = calculate_normalized_correlation(intcolors, intcolors2);
  	 if (initial){
