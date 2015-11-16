@@ -27,7 +27,10 @@ int main(int argc, char **argv)
 
   vector<PixelLoc> interiorR = getContour(tile, imageR);
   vector<PixelLoc> interiorL = getContour(tile, imageL);
-
+  vector<Coord> fpSource;
+  vector<Coord> fpDestination;
+  vector<Coord> fpR = getFeaturePoints(tile, imageR);
+  vector<Coord> fpL = getFeaturePoints(tile, imageL);
    Matrix3x3 myH1;
    vector<PixelLoc> interior;
    Image myimg;
@@ -39,6 +42,8 @@ int main(int argc, char **argv)
     myH1  = getHomography(tile, imageL, imageR);
     myimg = imageR.c_str();
     myimgOther = imageL.c_str();
+    fpSource = getFeaturePoints(tile, imageL); 
+    fpDestination = getFeaturePoints(tile, imageR); 
   }
   else
   {
@@ -46,14 +51,34 @@ int main(int argc, char **argv)
      myH1  = getHomography(tile, imageR, imageL);
     myimg = imageL.c_str();
     myimgOther = imageR.c_str();
+    fpSource = getFeaturePoints(tile, imageR);
+    fpDestination = getFeaturePoints(tile, imageL);
+
   }
 
   cerr << "homography: " << myH1 << endl; 
   for(int i=0;i<9;++i){
 	current[i] = myH1.m[i];
-  }  
+  }
 
-  for(int k=10; k < 100000; k*=10){
+  cout << "Origonal Feature points: " ;
+  for(unsigned int i=0;i<fpDestination.size();++i){
+        cout << fpDestination[i] << " ";
+  }
+  cout << endl << "Optimized Feature points: ";
+  for(unsigned int i=0;i<fpDestination.size();++i){
+      homography(fpSource[i].x,fpSource[i].y, current, point);
+      cout << point[0] << "," << point[1] << " ";
+  }
+
+Color red(255,0,0);
+Image imgInitial = myimgOther;
+for(unsigned int i=0; i<interior.size(); ++i){
+   imgInitial.setPixel(interior[i],red);
+}
+imgInitial.print("initial.ppm");
+
+for(int k=10; k < 100000; k*=10){
   cout << "Trying with scale = " << scale/k << endl;
   for(int j=0; j<20000; ++j){
   	for(unsigned int i=0; i<interior.size(); ++i){
@@ -101,5 +126,24 @@ int main(int argc, char **argv)
 	cout << best[i] << " ";
  } 
  cout << endl;
- 
+ cout << "Origonal Feature points: " ;
+ for(unsigned int i=0;i<fpDestination.size();++i){
+	cout << fpDestination[i] << " ";
+ }
+ cout << endl << "Optimized Feature points: ";
+ for(unsigned int i=0;i<fpDestination.size();++i){
+      homography(fpSource[i].x,fpSource[i].y, best, point);
+      cout << point[0] << "," << point[1] << " ";
+ } 
+for(unsigned int i=0; i<interior.size(); ++i){
+        homography(interior[i].x + 0.5 , interior[i].y + 0.5, best, point);
+        Coord mycoord(point[0], point[1]);
+        if (point[0] < myimg.getWidth() && point[1] < myimg.getHeight()){
+           myimgOther.setPixel(interior[i],asInterpolatedColor(mycoord, &myimg));
+        } else {
+                 continue;
+        }
+}
+myimgOther.print("initial.ppm");
+
 }
