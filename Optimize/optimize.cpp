@@ -2,12 +2,34 @@
 #include<iostream>
 #include<string>
 #include"eriolHeader.h"
-#include"../homography.h"
+#include"homography.h"
 #include"NCCDemo.h"
 #include"time.h"
 #include<cstdlib>
 Tile &loadJustOneTile(const string &tileID, const string &imgName);
 vector<PixelLoc> getPixelsFor(int);
+
+double calcNCC(vector<PixelLoc> *interior, double * current, Image *myimg, Image *myimgOther)
+{
+	Color black(0,0,0);
+ 	Color white(255,255,255);
+	vector<Color> signal1,signal2;
+	double point[2];
+	for(unsigned int i=0; i<interior->size(); ++i){
+		homography(interior[0][i].x + 0.5 , interior[0][i].y + 0.5, current, point);
+                Coord mycoord(point[0], point[1]);
+                if(inImage(myimg,mycoord)){
+                    signal1.push_back(asInterpolatedColor(mycoord, myimg));
+                } else {
+                    signal1.push_back(black);
+                    signal2.push_back(white);
+                    continue;
+                }
+                signal2.push_back(myimgOther->getPixel(interior[0][i]));
+         }
+         return calculate_normalized_correlation(signal1, signal2);
+}
+
 
 int main(int argc, char **argv)
 {
@@ -16,15 +38,15 @@ int main(int argc, char **argv)
   string imageR = image+"R";
   string imageL = image+"L";
   double point[2];
-  vector<Color> intcolors;
-  vector<Color> intcolors2;
   double * current = new double[9];
   double * best = new double[9];
   float ncc;
   float bestncc = -2;
   float first;
-  double scale = 0.01;
+  double scale = 0.000001;
   bool initial = true;
+  int position = 0;
+  int direction = 1;
 
   vector<PixelLoc> interiorR = getContour(tile, imageR);
   vector<PixelLoc> interiorL = getContour(tile, imageL);
@@ -41,7 +63,6 @@ int main(int argc, char **argv)
   {
     interior = getContour(tile, imageL);
     myH1  = getHomography(tile, imageL, imageR);
-    //myH1  = getHomography(tile, imageR, imageL);
     myimg = imageR.c_str();
     myimgOther = imageL.c_str();
     fpSource = getFeaturePoints(tile, imageL); 
@@ -51,7 +72,6 @@ int main(int argc, char **argv)
   {
     interior = getContour(tile, imageR);
     myH1  = getHomography(tile, imageR, imageL);
-   // myH1  = getHomography(tile, imageL, imageR);
     myimg = imageL.c_str();
     myimgOther = imageR.c_str();
     fpSource = getFeaturePoints(tile, imageR);
@@ -71,8 +91,6 @@ int main(int argc, char **argv)
 
 Color red(255,0,0);
 Color blue(0,0,100);
-Color black(0,0,0);
-Color white(255,255,255);
 
 Image imgInitial = myimg;
 Image src = myimgOther;
@@ -104,52 +122,41 @@ for(unsigned int i=0;i<fpDestination.size();++i){
 }
 src.print("src.ppm");
 
-for(int k=10; k < 100000; k*=10){
-  cout << endl << "Trying with scale = " << scale/k << endl;
   for(int j=0; j<20000; ++j){
-  	for(unsigned int i=0; i<interior.size(); ++i){
-		homography(interior[i].x + 0.5 , interior[i].y + 0.5, current, point);
-		Coord mycoord(point[0], point[1]);
-	        if(inImage(&myimg,mycoord)){	
-	            intcolors.push_back(asInterpolatedColor(mycoord, &myimg));
-		} else {
-	            intcolors.push_back(black);
-		    intcolors2.push_back(white);
-	 	    continue;
-		}
-		intcolors2.push_back(myimgOther.getPixel(interior[i]));
- 	 }
- 	 ncc = calculate_normalized_correlation(intcolors, intcolors2);
- 	 if (initial){
+  	ncc = calcNCC(&interior, current, &myimg, &myimgOther);
+	if (initial){
 		first = ncc;
- 	  	initial = false;
+   		initial = false;
 		//cout << "Initial: " << first << endl;
-	 }
-	 if (ncc > bestncc){
-		//cout << "Found better: " << ncc << endl;
+	}
+	if (ncc > bestncc){
 		bestncc = ncc;
-		for(int i=0;i<9;++i){
-			best[i] = current[i];
-		}
 		j=0;
-	 }
-	 long seed = (long)time(NULL) * j;
-	 //cout << seed << endl;
-         randHomography(best, current, seed, scale/k);
- 	 intcolors.clear();
- 	 intcolors2.clear();
-         }
+	}else{
+		if(direction == -1){
+			direction = 1;
+			if (position == 7){
+				 position = 0; 
+			}else{
+				 ++position;
+			}
+		}else{
+			direction = -1;
+		}
+			
+ 	}
+      	randHomography(direction, position, current, scale);
+  }
 // cout << "Best so far: " << bestncc << endl;
 // cout << "homography: ";
 // for(int i=0;i<9;++i){
 //        cout << best[i] << " ";
 // }
 // cout << endl;
- }
  cout << "First: " << first << " Best: " << bestncc << endl;
  cout << "homography: "; 
  for(int i=0;i<9;++i){
-	cout << best[i] << " ";
+	cout << current[i] << " ";
  } 
  cout << endl;
  cout << "Origonal Feature points: " ;
@@ -158,21 +165,21 @@ for(int k=10; k < 100000; k*=10){
  }
  cout << endl << "Optimized Feature points: ";
  for(unsigned int i=0;i<fpDestination.size();++i){
-      homography(fpSource[i].x,fpSource[i].y, best, point);
+      homography(fpSource[i].x,fpSource[i].y, current, point);
       cout << point[0] << "," << point[1] << " ";
  } 
 
 Image imgFinal = myimg;
 
 for(unsigned int i=0; i<interior.size(); ++i){
-   homography(interior[i].x, interior[i].y, best, point);
+   homography(interior[i].x, interior[i].y, current, point);
    PixelLoc loc((int)point[0], (int)point[1]);
    if(inImage(&imgInitial,loc)){
       imgFinal.setPixel(loc,blue);
    }
 }
 for(unsigned int i=0;i<fpDestination.size();++i){
-   homography(fpSource[i].x,fpSource[i].y, best, point);
+   homography(fpSource[i].x,fpSource[i].y, current, point);
    PixelLoc loc((int)point[0], (int)point[1]);
    if(inImage(&imgInitial,loc)){
       imgFinal.setPixel(loc,red);
