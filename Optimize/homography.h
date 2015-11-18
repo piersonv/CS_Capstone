@@ -21,5 +21,7 @@ void randHomography(double* h, double* temp, long now, double scale=0.00001){
                 temp[i] = h[i] + offset;
         }
 }
-
+void randHomography(int direction, int position, double* h, double scale){
+	h[position] += direction*scale;
+}
 #endif
