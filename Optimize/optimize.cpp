@@ -43,10 +43,11 @@ int main(int argc, char **argv)
   float ncc;
   float bestncc = -2;
   float first;
-  double scale = 0.000001;
+  double scale = 0.001;
   bool initial = true;
   int position = 0;
   int direction = 1;
+  bool optimize = true;
 
   vector<PixelLoc> interiorR = getContour(tile, imageR);
   vector<PixelLoc> interiorL = getContour(tile, imageL);
@@ -78,12 +79,20 @@ int main(int argc, char **argv)
     fpDestination = getFeaturePoints(tile, imageL);
 
   }
-
-  cerr << "homography: " << myH1 << endl; 
-  for(int i=0;i<9;++i){
-	current[i] = myH1.m[i];
+  if(argc == 12){
+	optimize = false;
+	for(int i=0;i<9;++i){
+        	current[i] = best[i] = (double)stol(argv[3+i]);
+  		cout << (double)stol(argv[3+i]) << endl;
+	}
+  	current[8] = best[8] = 1;	
+  }else{
+  	cerr << "homography: " << myH1 << endl; 
+  	for(int i=0;i<9;++i){
+		current[i] = best[i] = myH1.m[i];
+  	}
+  	current[8] = best[8] = 1;
   }
-
   cout << "Origonal Feature points: " ;
   for(unsigned int i=0;i<fpDestination.size();++i){
         cout << fpDestination[i] << " ";
@@ -122,7 +131,10 @@ for(unsigned int i=0;i<fpDestination.size();++i){
 }
 src.print("src.ppm");
 
-  for(int j=0; j<20000; ++j){
+if(optimize){
+for(int i=10; i<=100000000; i*=10){
+ 	cout <<"\nScale = " << scale/i << endl;
+   for(int j=0; j<50; ++j){
   	ncc = calcNCC(&interior, current, &myimg, &myimgOther);
 	if (initial){
 		first = ncc;
@@ -130,8 +142,13 @@ src.print("src.ppm");
 		//cout << "Initial: " << first << endl;
 	}
 	if (ncc > bestncc){
-		bestncc = ncc;
+		//cerr << ".";
+                bestncc = ncc;
 		j=0;
+		best[position] = current[position];
+		best[(position+1)%7] = current[(position+1)%7];
+		best[(position-1)%7] = current[(position-1)%7];
+		
 	}else{
 		if(direction == -1){
 			direction = 1;
@@ -145,8 +162,10 @@ src.print("src.ppm");
 		}
 			
  	}
-      	randHomography(direction, position, current, scale);
+      	randHomography(direction, position, best, current, scale/i);
   }
+}
+}
 // cout << "Best so far: " << bestncc << endl;
 // cout << "homography: ";
 // for(int i=0;i<9;++i){
@@ -159,27 +178,27 @@ src.print("src.ppm");
 	cout << current[i] << " ";
  } 
  cout << endl;
- cout << "Origonal Feature points: " ;
- for(unsigned int i=0;i<fpDestination.size();++i){
-	cout << fpDestination[i] << " ";
- }
+// cout << "Origonal Feature points: " ;
+// for(unsigned int i=0;i<fpDestination.size();++i){
+//	cout << fpDestination[i] << " ";
+// }
  cout << endl << "Optimized Feature points: ";
  for(unsigned int i=0;i<fpDestination.size();++i){
-      homography(fpSource[i].x,fpSource[i].y, current, point);
+      homography(fpSource[i].x,fpSource[i].y, best, point);
       cout << point[0] << "," << point[1] << " ";
  } 
-
+ cout << endl;
 Image imgFinal = myimg;
 
 for(unsigned int i=0; i<interior.size(); ++i){
-   homography(interior[i].x, interior[i].y, current, point);
+   homography(interior[i].x, interior[i].y, best, point);
    PixelLoc loc((int)point[0], (int)point[1]);
    if(inImage(&imgInitial,loc)){
       imgFinal.setPixel(loc,blue);
    }
 }
 for(unsigned int i=0;i<fpDestination.size();++i){
-   homography(fpSource[i].x,fpSource[i].y, current, point);
+   homography(fpSource[i].x,fpSource[i].y, best, point);
    PixelLoc loc((int)point[0], (int)point[1]);
    if(inImage(&imgInitial,loc)){
       imgFinal.setPixel(loc,red);
