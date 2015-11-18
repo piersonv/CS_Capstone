@@ -84,3 +84,53 @@ double calculate_normalized_correlation(const vector<Color> & first_signal, cons
 	return (double)correlation/correlation_scalar;
 
 }
+
+int main()
+{
+	vector<Color> first_signal;
+	vector<Color> second_signal;
+
+	first_signal.push_back(Color(20,50,60));
+	first_signal.push_back(Color(100,50,20));
+	first_signal.push_back(Color(80,200,100));
+	first_signal.push_back(Color(80,50,60));
+	first_signal.push_back(Color(20,50,70));
+
+	second_signal.push_back(Color(20,50,70));
+	second_signal.push_back(Color(20,50,70));
+	second_signal.push_back(Color(20,50,70));
+	second_signal.push_back(Color(20,50,70));
+	second_signal.push_back(Color(20,50,70));
+
+	float normalized_correlation;
+
+	normalized_correlation = calculate_normalized_correlation(first_signal, second_signal);
+
+	cout << "Signal correlation: " << normalized_correlation << endl;
+
+	return 0;
+
+}
+
+  vector<PixelLoc> interiorR = getContour(tile, imageR);
+  vector<PixelLoc> interiorL = getContour(tile, imageL);
+
+   Matrix3x3 myH1;
+   vector<PixelLoc> interior;
+   Image myimg;
+   Image myimgOther;
+
+  if (interiorR.size() > interiorL.size())
+  {
+    interior = getContour(tile, imageL);
+    myH1  = getHomography(tile, imageL, imageR);
+    myimg = imageR.c_str();
+    myimgOther = imageL.c_str();
+  }
+  else
+  {
+    interior = getContour(tile, imageR);
+     myH1  = getHomography(tile, imageR, imageL);
+    myimg = imageL.c_str();
+    myimgOther = imageR.c_str();
+  }
