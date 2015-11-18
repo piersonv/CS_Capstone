@@ -82,10 +82,15 @@ int main(int argc, char **argv)
   if(argc == 12){
 	optimize = false;
 	for(int i=0;i<9;++i){
-        	current[i] = best[i] = (double)stol(argv[3+i]);
-  		cout << (double)stol(argv[3+i]) << endl;
+        	current[i] = best[i] = (double)atof(argv[3+i]);
 	}
   	current[8] = best[8] = 1;	
+//  }else if(argc == 13){
+//	optimize = true;
+//       for(int i=0;i<9;++i){
+//                current[i] = best[i] = (double)atof(argv[3+i]);
+//        }
+//        current[8] = best[8] = 1;
   }else{
   	cerr << "homography: " << myH1 << endl; 
   	for(int i=0;i<9;++i){
@@ -130,9 +135,9 @@ for(unsigned int i=0;i<fpDestination.size();++i){
    }
 }
 src.print("src.ppm");
-
 if(optimize){
-for(int i=10; i<=100000000; i*=10){
+for(int p=0;p<4;++p){
+ for(int i=10; i<=100000000; i*=10){
  	cout <<"\nScale = " << scale/i << endl;
    for(int j=0; j<50; ++j){
   	ncc = calcNCC(&interior, current, &myimg, &myimgOther);
@@ -163,8 +168,9 @@ for(int i=10; i<=100000000; i*=10){
 			
  	}
       	randHomography(direction, position, best, current, scale/i);
+    }
   }
-}
+ }
 }
 // cout << "Best so far: " << bestncc << endl;
 // cout << "homography: ";
