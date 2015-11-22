@@ -137,7 +137,7 @@ for(unsigned int i=0;i<fpDestination.size();++i){
 src.print("src.ppm");
 if(optimize){
 for(int p=0;p<4;++p){
- for(int i=10; i<=100000000; i*=10){
+ for(int i=100; i<=100000; i*=2){
  	cout <<"\nScale = " << scale/i << endl;
    for(int j=0; j<50; ++j){
   	ncc = calcNCC(&interior, current, &myimg, &myimgOther);
