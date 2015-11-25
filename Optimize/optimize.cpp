@@ -40,6 +40,7 @@ int main(int argc, char **argv)
   double point[2];
   double * current = new double[9];
   double * best = new double[9];
+  double * init = new double[9];
   float ncc;
   float bestncc = -2;
   float first;
@@ -99,9 +100,9 @@ int main(int argc, char **argv)
   }else{
   	cerr << "homography: " << myH1 << endl; 
   	for(int i=0;i<9;++i){
-		current[i] = best[i] = myH1.m[i];
+		init[i] = current[i] = best[i] = myH1.m[i];
   	}
-  	current[8] = best[8] = 1;
+  	init[8] = current[8] = best[8] = 1;
   }
   cout << "Original Feature points: " ;
   for(unsigned int i=0;i<fpDestination.size();++i){
@@ -143,40 +144,35 @@ src.print("src.ppm");
 int count;
 cout << endl;
 if(optimize){
-	for(double i=1; i<=100000000; i*=10){
-		count = 0;
-		//position = 0;
- 		cout <<"Scale = " << (scale/i) << endl;
-		for(int j=0; j<32; ++j){
-  			ncc = calcNCC(&interior, current, &myimg, &myimgOther);
+	for(double i=1;i<=1000000;i*=10){
+	count = 0;
+ 	cout <<"Scale = " << (scale/i) << endl;
+		
+	double offset = -50*(scale/i);
+	for(int l=0; l<2; ++l){
+	for(int k=0; k < 8; ++k){
+		for(int j=1; j<=100; ++j){
+ 			ncc = calcNCC(&interior, current, &myimg, &myimgOther);
 			if (initial){
 				first = ncc;
    				initial = false;
-				//cout << "Initial: " << first << endl;
 			}
 			if (ncc > bestncc){
-   	       			++count;
+				l=0;
+	   	       		++count;
 				bestncc = ncc;
-				j=0;
-				best[position] = current[position];
-				best[(position+1)%7] = current[(position+1)%7];
-				best[(position-1)%7] = current[(position-1)%7];
-			}else{
-				if(direction == -1){
-					direction = 1;
-					if (position == 7){
-			 			position = 0; 
-					}else{
-			 			++position;
-					}
-				}else{
-					direction = -1;
-				}
-		
- 			}
-	     	randHomography(direction, position, best, current, scale/i);
+				best[k] = current[k];
+			}
+     		randHomography(k, init, current, offset + (scale/i)*j);
     		}
-	cout << count << endl;
+		cout << "Count: " << count << endl;
+		count = 0;
+		for(int j=0; j<9; ++j){
+			init[j] = current[j] =  best[j];
+		}	
+	}
+	}
+	
 	}
 }
 // cout << "Best so far: " << bestncc << endl;
