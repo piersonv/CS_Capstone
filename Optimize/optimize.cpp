@@ -38,10 +38,11 @@ int main(int argc, char **argv)
   double point[2];
   double * current = new double[9];
   double * best = new double[9];
+  double * init = new double[9];
   float ncc;
   float bestncc = -2;
   float first;
-  double scale = 0.001;
+  double scale = 0.01;
   bool initial = true;
   int position = 0;
   int direction = 1;
@@ -83,20 +84,25 @@ int main(int argc, char **argv)
         	current[i] = best[i] = (double)atof(argv[3+i]);
 	}
   	current[8] = best[8] = 1;	
-//  }else if(argc == 13){
-//	optimize = true;
-//       for(int i=0;i<9;++i){
-//                current[i] = best[i] = (double)atof(argv[3+i]);
-//        }
-//        current[8] = best[8] = 1;
+  }else if(argc == 21){
+	optimize = false;
+	cout << "Comparing" << endl;
+       	for(int i=0;i<18;++i){
+                if (i < 9){
+			current[i] = (double)atof(argv[3+i]);
+		} else {
+			best[i-9] = (double)atof(argv[3+i]);
+		} 
+        }
+        current[8] = best[8] = 1;
   }else{
   	cerr << "homography: " << myH1 << endl; 
   	for(int i=0;i<9;++i){
-		current[i] = best[i] = myH1.m[i];
+		init[i] = current[i] = best[i] = myH1.m[i];
   	}
-  	current[8] = best[8] = 1;
+  	init[8] = current[8] = best[8] = 1;
   }
-  cout << "Origonal Feature points: " ;
+  cout << "Original Feature points: " ;
   for(unsigned int i=0;i<fpDestination.size();++i){
         cout << fpDestination[i] << " ";
   }
@@ -133,42 +139,39 @@ for(unsigned int i=0;i<fpDestination.size();++i){
    }
 }
 src.print("src.ppm");
+int count;
+cout << endl;
 if(optimize){
-for(int p=0;p<4;++p){
- for(int i=10; i<=100000000; i*=10){
- 	cout <<"\nScale = " << scale/i << endl;
-   for(int j=0; j<50; ++j){
-  	ncc = calcNCC(&interior, current, &myimg, &myimgOther);
-	if (initial){
-		first = ncc;
-   		initial = false;
-		//cout << "Initial: " << first << endl;
-	}
-	if (ncc > bestncc){
-		//cerr << ".";
-                bestncc = ncc;
-		j=0;
-		best[position] = current[position];
-		best[(position+1)%7] = current[(position+1)%7];
-		best[(position-1)%7] = current[(position-1)%7];
+	for(double i=1;i<=1000000;i*=10){
+	count = 0;
+ 	cout <<"Scale = " << (scale/i) << endl;
 		
-	}else{
-		if(direction == -1){
-			direction = 1;
-			if (position == 7){
-				 position = 0; 
-			}else{
-				 ++position;
+	double offset = -50*(scale/i);
+	for(int l=0; l<2; ++l){
+	for(int k=0; k < 8; ++k){
+		for(int j=1; j<=100; ++j){
+ 			ncc = calcNCC(&interior, current, &myimg, &myimgOther);
+			if (initial){
+				first = ncc;
+   				initial = false;
 			}
-		}else{
-			direction = -1;
-		}
-			
- 	}
-      	randHomography(direction, position, best, current, scale/i);
-    }
-  }
- }
+			if (ncc > bestncc){
+				l=0;
+	   	       		++count;
+				bestncc = ncc;
+				best[k] = current[k];
+			}
+     		randHomography(k, init, current, offset + (scale/i)*j);
+    		}
+		cout << "Count: " << count << endl;
+		count = 0;
+		for(int j=0; j<9; ++j){
+			init[j] = current[j] =  best[j];
+		}	
+	}
+	}
+	
+	}
 }
 // cout << "Best so far: " << bestncc << endl;
 // cout << "homography: ";
