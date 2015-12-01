@@ -16,3 +16,7 @@ dataCollection.o: dataCollection.cpp dataCollection.h
 
 dataCollectionDriver.o: dataCollectionDriver.cpp dataCollection.h
 	g++ -g -Wall -std=c++11 -c dataCollectionDriver.cpp
+
+Optimize-Test: optimize-test.cpp eriolHeader.h eriolObjs.o NCCDemo.h homography.h
+	$(CC) $(OPTS) optimize-test.cpp eriolObjs.o $(LIBS) -o $@
+
