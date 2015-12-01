@@ -1,10 +1,8 @@
 // by Olaf Hall-Holt, 2007-2015
 #include<iostream>
 #include<string>
-#include"eriolHeader.h"
-#include"homography.h"
-#include"NCCDemo.h"
 #include"time.h"
+#include"glareReduction.h" 
 #include<cstdlib>
 Tile &loadJustOneTile(const string &tileID, const string &imgName);
 vector<PixelLoc> getPixelsFor(int);
@@ -178,7 +176,12 @@ for(int p=0;p<4;++p){
 //        cout << best[i] << " ";
 // }
 // cout << endl;
- cout << "First: " << first << " Best: " << bestncc << endl;
+
+Image imageWithGlare = myimg;
+
+
+ int ncc_glare_reduced = calculateNCCWithoutGlare(&interior, best, &myimg, &myimgOther, &imageWithGlare);
+ cout << "First: " << first << " Best: " << bestncc <<  "Glare Reduced: " << ncc_glare_reduced << endl;
  cout << "homography: "; 
  for(int i=0;i<9;++i){
 	cout << current[i] << " ";
@@ -211,5 +214,6 @@ for(unsigned int i=0;i<fpDestination.size();++i){
    }
 }
 imgFinal.print("final.ppm");
-system("/home/mscs/bin/show src.ppm initial.ppm final.ppm");
+imageWithGlare.print("glare.ppm");
+system("/home/mscs/bin/show src.ppm initial.ppm final.ppm glare.ppm");
 }

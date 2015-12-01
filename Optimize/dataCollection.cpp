@@ -68,7 +68,37 @@ void dataCollection::print() //print object to terminal
 	cout << endl;
 }
 
-/*void checkFile(string condition, int index, vector<dataCollection> entries)
+void checkFile(string condition, int index, vector<dataCollection> entries)
+{
+	int entry_count = 0;
+	ifstream stream;
+	string line;
+	char ** parsed_line = new char * [1000];
+
+	int numLines = 0;
+	ifstream in("test.txt");
+	std::string unused;
+	while ( getline(in, unused) )
+	   ++numLines;
+
+	stream.open("test.txt", std::ofstream::in);
+
+	while(getline(stream, line))
+	{
+		line[sizeof(line)] = '\0';
+		parser(parsed_line, line);
+		cout << "Got here" << endl;
+		for (int i = 0; i < (signed)sizeof(parsed_line); i++)
+		{
+			cout << parsed_line[i] << endl;
+		}
+		entry_count++;
+	}
+
+	stream.close();
+}
+
+/*void checkFile(string condition1, string condition2, int initialIndex, vector<dataCollection> entries)
 {
 	int entry_count = 0;
 	ifstream stream;
@@ -95,38 +125,9 @@ void dataCollection::print() //print object to terminal
 	}
 
 	stream.close();
-}
+}*/
 
-void checkFile(string condition1, string condition2, int initialIndex, vector<dataCollection> entries)
-{
-	int entry_count = 0;
-	ifstream stream;
-	string line;
-	char ** parsed_line = new char * [1000];
-
-	int numLines = 0;
-	ifstream in("test.txt");
-	std::string unused;
-	while ( getline(in, unused) )
-	   ++numLines;
-
-	stream.open("test.txt", std::ofstream::in);
-
-	while(getline(stream, line))
-	{
-		parser(parsed_line, line);
-		cout << "Got here" << endl;
-		for (int i = 0; i < (signed)sizeof(parsed_line); i++)
-		{
-			cout << parsed_line[i] << endl;
-		}
-		entry_count++;
-	}
-
-	stream.close();
-}
-
-vector<dataCollection> dataCollection::getAll() //Static. Returns a vector of every entry
+vector<dataCollection> getAll() //Static. Returns a vector of every entry
 {
 	vector<dataCollection> entries;
 	int entry_count = 0;
@@ -144,6 +145,7 @@ vector<dataCollection> dataCollection::getAll() //Static. Returns a vector of ev
 
 	while(getline(stream, line))
 	{
+		line[sizeof(line)] = '\0';
 		parser(parsed_line, line);
 		cout << "Got here" << endl;
 		for (int i = 0; i < (signed)sizeof(parsed_line); i++)
@@ -157,7 +159,7 @@ vector<dataCollection> dataCollection::getAll() //Static. Returns a vector of ev
 	return entries;
 }
 
-vector<dataCollection> dataCollection::getEntriesByImage(string i) //Static. Returns entries associated with given image.
+/*vector<dataCollection> dataCollection::getEntriesByImage(string i) //Static. Returns entries associated with given image.
 {
 	vector<dataCollection> entries;
 	checkFile(i, 2, entries);

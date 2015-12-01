@@ -1,8 +1,6 @@
 #include <iostream>
 #include <string>
-#include "eriolHeader.h"
-//#include "../homography.h"
-//#include "NCCDemo.h"
+#include <vector>
 #include"time.h"
 using namespace std;
 
@@ -47,8 +45,8 @@ public:
 
 	void print(); //print object to terminal
 
-	/*static vector<dataCollection> getAll(); //Returns a vector of every entry
-	static vector<dataCollection> getEntriesByImage(string i); //Returns entries associated with given image.
+	static vector<dataCollection> getAll(); //Returns a vector of every entry
+	/*static vector<dataCollection> getEntriesByImage(string i); //Returns entries associated with given image.
 	static vector<dataCollection> getEntriesByImagePair(string i1, string i2); //Returns entries associated with given image pair.
 	static vector<dataCollection> getEntriesByTile(string t); //Returns entries associated with given tile
 	static vector<dataCollection> getEntriesByNCCRange(int iNCC, int fNCC); //Returns entries between given range of NCC values.

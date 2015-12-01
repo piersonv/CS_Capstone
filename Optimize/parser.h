@@ -52,7 +52,7 @@ int parser (char ** parsed_line, string input_string)
 
     word_size++;
   
-    if (char_count > nchars || word_count > MAXTOKS)
+    if (char_count > nchars)
     {
       return 1;
     }     
