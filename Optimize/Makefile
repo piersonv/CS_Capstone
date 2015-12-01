@@ -12,3 +12,6 @@ dataCollection.o:
 
 Optimize: optimize.cpp eriolHeader.h eriolObjs.o NCCDemo.h homography.h
 	$(CC) $(OPTS) optimize.cpp eriolObjs.o $(LIBS) -o $@
+
+Optimize-Test: optimize-test.cpp eriolHeader.h eriolObjs.o NCCDemo.h homography.h
+	$(CC) $(OPTS) optimize-test.cpp eriolObjs.o $(LIBS) -o $@
