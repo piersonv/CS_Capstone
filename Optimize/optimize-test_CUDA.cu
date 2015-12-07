@@ -9,32 +9,31 @@
 #include <math.h>
 #include "book.h"
 
-__device__ double dev_correlation;
+__device__ double dev_correlation[1];
 
-__global__ void calculate_correlation_CUDA(const Color * & first_signal, const Color * & second_signal, double * signal_correlationR_thread, double * signal_correlationG_thread, double * signal_correlationB_thread)
+__global__ void calculate_correlation_CUDA(int signal_size, const Color * first_signal, const Color * second_signal, double * signal_correlationR_thread, double * signal_correlationG_thread, double * signal_correlationB_thread)
 {
-  unsigned int tid = threadIdx.x + blockIdx.x * numBlock;
-  int size_of_signal = first_signal.size();
+  unsigned int tid = threadIdx.x + blockIdx.x * blockDim.x;
 
   double signal_correlationR = 0;
   double signal_correlationG = 0;
   double signal_correlationB = 0;
 
-  signal_correlationR_thread = first_signal[tid].r*second_signal[tid].r;
-  signal_correlationG_thread = first_signal[tid].g*second_signal[tid].g;
-  signal_correlationB_thread = first_signal[tid].b*second_signal[ctid].b;
+  signal_correlationR_thread[tid] = first_signal[tid].r*second_signal[tid].r;
+  signal_correlationG_thread[tid] = first_signal[tid].g*second_signal[tid].g;
+  signal_correlationB_thread[tid] = first_signal[tid].b*second_signal[tid].b;
 
   if(tid == 0){
-    for (int i = 0; i < size_of_signal; i++){
+    for (int i = 0; i < signal_size; i++){
       signal_correlationR += signal_correlationR_thread[i];
       signal_correlationG += signal_correlationG_thread[i];
       signal_correlationB += signal_correlationB_thread[i];
     }
-    dev_correlation = (signal_correlationR+signal_correlationG+signal_correlationB)/3
+    dev_correlation[0] = (signal_correlationR+signal_correlationG+signal_correlationB)/3;
   }
 }
 
-double calculate_normalized_correlation_CUDA(int signal_size, const Color * & first_signal, const Color * & second_signal)
+double calculate_normalized_correlation_CUDA(int signal_size, const Color * first_signal, const Color * second_signal)
 {  
   //CUDA Variables
   double * signal_correlationR_thread;
@@ -58,9 +57,9 @@ double calculate_normalized_correlation_CUDA(int signal_size, const Color * & fi
   double block_num = round(sqrt(signal_size));
   double thread_num = signal_size/block_num;
 
-  double correlation; 
-  calculate_correlation_CUDA<<<block_num,thread_num>>>(dev_first_signal, dev_second_signal, signal_correlationR, signal_correlationG, signal_correlationB);
-  cudaMemcpy(&correlation, dev_correlation, sizeof(double), cudaMemcpyDeviceToHost);
+  double correlation[1]; 
+  calculate_correlation_CUDA<<<block_num,thread_num>>>(signal_size, dev_first_signal, dev_second_signal, signal_correlationR_thread, signal_correlationG_thread, signal_correlationB_thread);
+  //cudaMemcpy(&correlation, dev_correlation, sizeof(double), cudaMemcpyDeviceToHost);
 
   double sum_first_signalR = 0;
   double sum_second_signalR = 0;
@@ -83,7 +82,7 @@ double calculate_normalized_correlation_CUDA(int signal_size, const Color * & fi
   double total_sum2 = (sum_second_signalR + sum_second_signalG + sum_second_signalB) / 3; 
   correlation_scalar = sqrt(total_sum1*total_sum2);
 
-  return (double)correlation/correlation_scalar;
+  return (double)correlation[0]/correlation_scalar;
 
 }
 

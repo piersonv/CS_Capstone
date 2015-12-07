@@ -13,7 +13,7 @@ __device__ double dev_correlation;
 
 __global__ void calculate_correlation_CUDA(const Color * & first_signal, const Color * & second_signal, double * signal_correlationR_thread, double * signal_correlationG_thread, double * signal_correlationB_thread)
 {
-  unsigned int tid = threadIdx.x + blockIdx.x * numBlock;
+  unsigned int tid = threadIdx.x + blockIdx.x * blockDim.x;
   int size_of_signal = first_signal.size();
 
   double signal_correlationR = 0;
