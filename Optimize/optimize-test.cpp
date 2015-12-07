@@ -31,10 +31,7 @@ double calcNCC(vector<PixelLoc> *interior, double * current, Image *myimg, Image
 
 int main(int argc, char **argv)
 {
-  string tile = argv[1];
-  string image = argv[2];
-  string imageR = image+"R";
-  string imageL = image+"L";
+  cout << "Starting" << endl;
   double point[2];
   double * current = new double[9];
   double * best = new double[9];
@@ -42,14 +39,14 @@ int main(int argc, char **argv)
   float ncc;
   float bestncc = -2;
   float first;
-  double scale = 0.01;
+  double scale = 0.1;
   bool initial = true;
-  int position = 0;
-  int direction = 1;
+  //int position = 0;
+  //int direction = 1;
   bool optimize = true;
 
  cout << "Starting" << endl; 
-vector<PixelLoc> interior;
+ vector<PixelLoc> interior;
  for(int i=5; i<=10; ++i){
 	for(int j=5; j<=10; ++j){
 	PixelLoc point(i, j);

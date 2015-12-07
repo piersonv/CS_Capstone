@@ -80,7 +80,9 @@ double calculate_normalized_correlation(const vector<Color> & first_signal, cons
 	double total_sum1 = (sum_first_signalR + sum_first_signalG + sum_first_signalB) / 3; 
 	double total_sum2 = (sum_second_signalR + sum_second_signalG + sum_second_signalB) / 3; 
 	correlation_scalar = sqrt(total_sum1*total_sum2);
-
-	return (double)correlation/correlation_scalar;
-
+	if(correlation_scalar == 0){
+		return -1;
+	}else{
+		return (double)correlation/correlation_scalar;
+	}
 }
