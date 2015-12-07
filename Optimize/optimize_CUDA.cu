@@ -5,7 +5,7 @@
 #include "glareReduction.h" 
 #include <cstdlib>
 #include <math.h>
-#include "../common/book.h"
+#include "book.h"
 #include <thrust/host_vector.h>
 #include <thrust/device_vector.h>
 
