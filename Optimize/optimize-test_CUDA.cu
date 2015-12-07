@@ -8,14 +8,12 @@
 #include <cstdlib>
 #include <math.h>
 #include "book.h"
-#include <thrust/host_vector.h>
-#include <thrust/device_vector.h>
 
 __device__ double dev_correlation;
 
-__global__ void calculate_correlation_CUDA(const thrust::device_vector<Color> & first_signal, const thrust::device_vector<Color> & second_signal, double * signal_correlationR_thread, double * signal_correlationG_thread, double * signal_correlationB_thread)
+__global__ void calculate_correlation_CUDA(const Color * & first_signal, const Color * & second_signal, double * signal_correlationR_thread, double * signal_correlationG_thread, double * signal_correlationB_thread)
 {
-  unsigned int tid = threadIdx.x + blockIdx.x * blockDim.x;
+  unsigned int tid = threadIdx.x + blockIdx.x * numBlock;
   int size_of_signal = first_signal.size();
 
   double signal_correlationR = 0;
@@ -36,27 +34,29 @@ __global__ void calculate_correlation_CUDA(const thrust::device_vector<Color> & 
   }
 }
 
-double calculate_normalized_correlation_CUDA(const thrust::host_vector<Color> & first_signal, const thrust::host_vector<Color> & second_signal)
-{
-  int size_of_signal = first_signal.size();
-  
+double calculate_normalized_correlation_CUDA(int signal_size, const Color * & first_signal, const Color * & second_signal)
+{  
   //CUDA Variables
   double * signal_correlationR_thread;
   double * signal_correlationG_thread;
   double * signal_correlationB_thread;
-  Color * dev_first_signal = first_signal;
-  Color * dev_second_signal = second_signal;
+  Color * dev_first_signal;
+  Color * dev_second_signal;
 
   //CUDA Allocation
-  cudaMalloc(&signal_correlationR_thread, size_of_signal*sizeof(double));
-  cudaMalloc(&signal_correlationG_thread, size_of_signal*sizeof(double));
-  cudaMalloc(&signal_correlationB_thread, size_of_signal*sizeof(double));
-  cudaMalloc(&dev_first_signal, size_of_signal*sizeof(Color));
-  cudaMalloc(&dev_second_signal, size_of_signal*sizeof(Color));
+  cudaMalloc(&signal_correlationR_thread, signal_size*sizeof(double));
+  cudaMalloc(&signal_correlationG_thread, signal_size*sizeof(double));
+  cudaMalloc(&signal_correlationB_thread, signal_size*sizeof(double));
+  cudaMalloc(&dev_first_signal, signal_size*sizeof(Color));
+  cudaMalloc(&signal_correlationB_thread, signal_size*sizeof(Color));
+
+  //CUDA Copying
+  cudaMemcpy(&dev_first_signal, first_signal, sizeof(signal_size), cudaMemcpyHostToDevice);
+  cudaMemcpy(&dev_second_signal, second_signal, sizeof(signal_size), cudaMemcpyHostToDevice);
 
   //Calculate block and thread size
-  double block_num = round(sqrt(size_of_signal));
-  double thread_num = size_of_signal/block_num;
+  double block_num = round(sqrt(signal_size));
+  double thread_num = signal_size/block_num;
 
   double correlation; 
   calculate_correlation_CUDA<<<block_num,thread_num>>>(dev_first_signal, dev_second_signal, signal_correlationR, signal_correlationG, signal_correlationB);
@@ -70,7 +70,7 @@ double calculate_normalized_correlation_CUDA(const thrust::host_vector<Color> & 
   double sum_second_signalB = 0;
   int correlation_scalar = 0;
 
-  for (int count = 0; count < size_of_signal; count++)
+  for (int count = 0; count < signal_size; count++)
   {
     sum_first_signalR += first_signal[count].r * first_signal[count].r;
     sum_second_signalR += second_signal[count].r * second_signal[count].r;
@@ -89,23 +89,23 @@ double calculate_normalized_correlation_CUDA(const thrust::host_vector<Color> & 
 
 double calcNCC(vector<PixelLoc> *interior, double * current, Image *myimg, Image *myimgOther)
 {
-	Color black(0,0,0);
- 	Color white(255,255,255);
-	thrust::host_vector<Color> signal1,signal2;
-	double point[2];
-	for(unsigned int i=0; i<interior->size(); ++i){
-		homography(interior[0][i].x + 0.5 , interior[0][i].y + 0.5, current, point);
+  int signal_size = interior->size();
+  Color black(0,0,0);
+  Color white(255,255,255);
+  Color signal1[signal_size], signal2[signal_size];
+  double point[2];
+  for(unsigned int i=0; i<signal_size; ++i){
+    homography(interior[0][i].x + 0.5 , interior[0][i].y + 0.5, current, point);
                 Coord mycoord(point[0], point[1]);
                 if(inImage(myimg,mycoord)){
-                    signal1.push_back(asInterpolatedColor(mycoord, myimg));
+                    signal1[i] = asInterpolatedColor(mycoord, myimg);
+                    signal2[i] = myimgOther->getPixel(interior[0][i]);
                 } else {
-                    signal1.push_back(black);
-                    signal2.push_back(white);
-                    continue;
+                    signal1[i] = black;
+                    signal2[i] = white;
                 }
-                signal2.push_back(myimgOther->getPixel(interior[0][i]));
          }
-         return calculate_normalized_correlation_CUDA(signal1, signal2);
+         return calculate_normalized_correlation_CUDA(signal_size, signal1, signal2);
 }
 
 
@@ -128,21 +128,21 @@ int main(int argc, char **argv)
  cout << "Starting" << endl; 
  vector<PixelLoc> interior;
  for(int i=5; i<=10; ++i){
-	for(int j=5; j<=10; ++j){
-	PixelLoc point(i, j);
-	interior.push_back(point);
-	}
+  for(int j=5; j<=10; ++j){
+  PixelLoc point(i, j);
+  interior.push_back(point);
+  }
  }
 cout << "Creating Images" << endl;
  Image myimg("test-initial.ppm");
  Image myimgOther("test-final.ppm");
 cout << "Images created" << endl;
  for(int i=0;i<9;++i){
-		init[i] = current[i] = best[i] = 0; 
+    init[i] = current[i] = best[i] = 0; 
  }
-  	init[8] = current[8] = best[8] = 1;
-  	init[0] = current[0] = best[0] = 1;
-  	init[4] = current[4] = best[4] = 1;
+    init[8] = current[8] = best[8] = 1;
+    init[0] = current[0] = best[0] = 1;
+    init[4] = current[4] = best[4] = 1;
   
 
 Color red(255,0,0);
@@ -171,42 +171,42 @@ src.print("src.ppm");
 int count;
 cout << endl;
 if(optimize){
-	for(double i=1;i<=1000000;i*=10){
-	count = 0;
- 	cout <<"Scale = " << (scale/i) << endl;
-		
-	double offset = -50*(scale/i);
-	for(int l=0; l<2; ++l){
-	for(int k=0; k < 8; ++k){
-		for(int j=1; j<=100; ++j){
- 			ncc = calcNCC(&interior, current, &myimg, &myimgOther);
-			if (initial){
-				first = ncc;
-   				initial = false;
-			}
-			if (ncc > bestncc){
-				l=0;
-	   	       		++count;
-				bestncc = ncc;
-				best[k] = current[k];
-			}
-     		randHomography(k, init, current, offset + (scale/i)*j);
-    		}
-		cout << "Count: " << count << endl;
-		count = 0;
-		for(int j=0; j<9; ++j){
-			init[j] = current[j] =  best[j];
-		}	
-	}
-	}
-	
-	}
+  for(double i=1;i<=1000000;i*=10){
+  count = 0;
+  cout <<"Scale = " << (scale/i) << endl;
+    
+  double offset = -50*(scale/i);
+  for(int l=0; l<2; ++l){
+  for(int k=0; k < 8; ++k){
+    for(int j=1; j<=100; ++j){
+      ncc = calcNCC(&interior, current, &myimg, &myimgOther);
+      if (initial){
+        first = ncc;
+          initial = false;
+      }
+      if (ncc > bestncc){
+        l=0;
+                ++count;
+        bestncc = ncc;
+        best[k] = current[k];
+      }
+        randHomography(k, init, current, offset + (scale/i)*j);
+        }
+    cout << "Count: " << count << endl;
+    count = 0;
+    for(int j=0; j<9; ++j){
+      init[j] = current[j] =  best[j];
+    } 
+  }
+  }
+  
+  }
 }
  
  cout << "First: " << first << " Best: " << bestncc << endl;
  cout << "homography: "; 
  for(int i=0;i<9;++i){
-	cout << current[i] << " ";
+  cout << current[i] << " ";
  } 
  cout << endl;
 Image imgFinal = myimg;
