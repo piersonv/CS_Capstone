@@ -91,13 +91,13 @@ src.print("src.ppm");
 int count;
 cout << endl;
 if(optimize){
-	for(double i=1;i<=100000;i*=100){
+	for(double i=1;i<=100000;i*=10){
 		count = 0;
  		cout <<"Scale = " << (scale/i) << endl;
-		double offset = -500*(scale/i);
+		double offset = -50*(scale/i);
 		for(int l=0; l<2; ++l){
 			for(int k=0; k < 8; ++k){
-				for(int j=1; j<=1000; ++j){
+				for(int j=1; j<=100; ++j){
  					ncc = calcNCC(&interior, current, &myimg, &myimgOther);
 					if (initial){
 						first = ncc;
@@ -111,14 +111,13 @@ if(optimize){
 					}
      				randHomography(k, init, current, offset + (scale/i)*j);
     				}
-				cout << "Count: " << count << endl;
-				count = 0;
 				for(int j=0; j<9; ++j){
 					init[j] = current[j] =  best[j];
 				}	
 			}
+			cout << "." << endl;
 		}
-		cout << "homography: "; 
+		cout << "\nhomography: "; 
 		for(int i=0;i<9;++i){
 			cout << current[i] << " ";
  		} 
