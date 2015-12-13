@@ -7,29 +7,6 @@
 #include"time.h"
 #include<cstdlib>
 
-/*
-double calcNCC(vector<PixelLoc> *interior, double * current, Image *myimg, Image *myimgOther)
-{
-	Color black(0,0,0);
- 	Color white(255,255,255);
-	vector<Color> signal1,signal2;
-	double point[2];
-	for(unsigned int i=0; i<interior->size(); ++i){
-		homography(interior[0][i].x + 0.5 , interior[0][i].y + 0.5, current, point);
-                Coord mycoord(point[0], point[1]);
-                if(inImage(myimg,mycoord)){
-                    signal1.push_back(asInterpolatedColor(mycoord, myimg));
-                } else {
-                    signal1.push_back(black);
-                    signal2.push_back(white);
-                    continue;
-                }
-                signal2.push_back(myimgOther->getPixel(interior[0][i]));
-         }
-         return calculate_normalized_correlation(signal1, signal2);
-}
-*/
-
 int main(int argc, char **argv)
 {
   cout << "Starting" << endl;
@@ -45,7 +22,6 @@ int main(int argc, char **argv)
   //int direction = 1;
   bool optimize = true;
 
- cout << "Starting" << endl; 
  vector<PixelLoc> interior;
  for(int i=9; i<=23; ++i){
 	for(int j=9; j<=23; ++j){
@@ -53,10 +29,8 @@ int main(int argc, char **argv)
 	interior.push_back(point);
 	}
  }
-cout << "Creating Images" << endl;
  Image myimg("test-initial.ppm");
  Image myimgOther("test-final.ppm");
-cout << "Images created" << endl;
  for(int i=0;i<9;++i){
 		init[i] = current[i] = best[i] = 0; 
  }
