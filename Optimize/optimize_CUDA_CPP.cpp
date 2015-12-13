@@ -1,17 +1,97 @@
 // by Olaf Hall-Holt, 2007-2015
-#include<iostream>
-#include<string>
-#include"time.h"
-#include"glareReduction.h" 
-#include<cstdlib>
+#include <iostream>
+#include <string>
+#include "time.h"
+#include "glareReduction.h" 
+#include <cstdlib>
+#include <math.h>
+#include "../common/book.h"
+#include <thrust/host_vector.h>
+#include <thrust/device_vector.h>
+
 Tile &loadJustOneTile(const string &tileID, const string &imgName);
 vector<PixelLoc> getPixelsFor(int);
 
+__device__ double dev_correlation;
+
+__global__ void calculate_correlation_CUDA(const thrust::device_vector<Color> & first_signal, const thrust::device_vector<Color> & second_signal, double * signal_correlationR_thread, double * signal_correlationG_thread, double * signal_correlationB_thread);
+{
+	unsigned int tid = threadIdx.x + blockIdx.x * numBlock;
+	int size_of_signal = first_signal.size();
+
+	double signal_correlationR = 0;
+	double signal_correlationG = 0;
+	double signal_correlationB = 0;
+
+	signal_correlationR_thread = first_signal[tid].r*second_signal[tid].r;
+	signal_correlationG_thread = first_signal[tid].g*second_signal[tid].g;
+	signal_correlationB_thread = first_signal[tid].b*second_signal[ctid].b;
+
+	if(tid == 0){
+		for (int i = 0; i < size_of_signal; i++){
+			signal_correlationR += signal_correlationR_thread[i];
+			signal_correlationG += signal_correlationG_thread[i];
+			signal_correlationB += signal_correlationB_thread[i];
+		}
+		dev_correlation = (signal_correlationR+signal_correlationG+signal_correlationB)/3
+	}
+}
+
+double calculate_normalized_correlation_CUDA(const thrust::host_vector<Color> & first_signal, const thrust::host_vector<Color> & second_signal)
+{
+	int size_of_signal = first_signal.size();
+	
+	//CUDA Variables
+	double * signal_correlationR_thread;
+	double * signal_correlationG_thread;
+	double * signal_correlationB_thread;
+	thrust::device_vector<Color> dev_first_signal = first_signal;
+	thrust::device_vector<Color> dev_second_signal = second_signal;
+
+	//CUDA Allocation
+	cudaMalloc(&signal_correlationR_thread, size_of_signal*sizeof(double));
+	cudaMalloc(&signal_correlationG_thread, size_of_signal*sizeof(double));
+	cudaMalloc(&signal_correlationB_thread, size_of_signal*sizeof(double));
+
+	//Calculate block and thread size
+	double block_num = round(sqrt(size_of_signal));
+	double thread_num = size_of_signal/block_num;
+
+	double correlation; 
+	calculate_correlation_CUDA<<<block_num,thread_num>>>(dev_first_signal, dev_second_signal, signal_correlationR, signal_correlationG, signal_correlationB);
+	cudaMemcpy(&correlation, dev_correlation, sizeof(double), cudaMemcpyDeviceToHost);
+
+	double sum_first_signalR = 0;
+	double sum_second_signalR = 0;
+	double sum_first_signalG = 0;
+	double sum_second_signalG = 0;
+	double sum_first_signalB = 0;
+	double sum_second_signalB = 0;
+	int correlation_scalar = 0;
+
+	for (int count = 0; count < size_of_signal; count++)
+	{
+		sum_first_signalR += first_signal[count].r * first_signal[count].r;
+		sum_second_signalR += second_signal[count].r * second_signal[count].r;
+		sum_first_signalG += first_signal[count].g * first_signal[count].g;
+		sum_second_signalG += second_signal[count].g * second_signal[count].g;
+		sum_first_signalB += first_signal[count].b * first_signal[count].b;
+		sum_second_signalB += second_signal[count].b * second_signal[count].b;
+	}
+	double total_sum1 = (sum_first_signalR + sum_first_signalG + sum_first_signalB) / 3; 
+	double total_sum2 = (sum_second_signalR + sum_second_signalG + sum_second_signalB) / 3; 
+	correlation_scalar = sqrt(total_sum1*total_sum2);
+
+	return (double)correlation/correlation_scalar;
+
+}
+
 double calcNCC(vector<PixelLoc> *interior, double * current, Image *myimg, Image *myimgOther)
 {
+	int 
 	Color black(0,0,0);
  	Color white(255,255,255);
-	vector<Color> signal1,signal2;
+	thrust::host_vector<Color> signal1, signal2;
 	double point[2];
 	for(unsigned int i=0; i<interior->size(); ++i){
 		homography(interior[0][i].x + 0.5 , interior[0][i].y + 0.5, current, point);
@@ -25,12 +105,13 @@ double calcNCC(vector<PixelLoc> *interior, double * current, Image *myimg, Image
                 }
                 signal2.push_back(myimgOther->getPixel(interior[0][i]));
          }
-         return calculate_normalized_correlation(signal1, signal2);
+         return calculate_normalized_correlation_CUDA(signal1, signal2);
 }
 
 
 int main(int argc, char **argv)
 {
+  //CPU variables
   string tile = argv[1];
   string image = argv[2];
   string imageR = image+"R";
