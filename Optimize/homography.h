@@ -126,8 +126,8 @@ void Optimize(double scale, double &first, double &ncc, double &bestncc, vector<
 		if(!success){
 			++failures;
 		}
-		printHomographyTile(myimg, myimg, *interior, best);
-		system("/home/mscs/bin/show final.ppm"); 
+		//printHomographyTile(myimg, myimg, *interior, best);
+		//system("/home/mscs/bin/show final.ppm"); 
        }
 }
 #endif
