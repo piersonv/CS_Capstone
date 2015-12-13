@@ -3,17 +3,20 @@
 #include <fstream> 
 #include <iostream>
 #include <stdio.h>
+#include <stdlib.h>
 using namespace std;
 
 
-dataCollection::dataCollection(string t, string sI, string iR, string iL, int iNCC, int fNCC, double * iH, double * fH)
+dataCollection::dataCollection(int v, string t, string sI, string iR, string iL, float iNCC, float fNCC, float gNCC, double * iH, double * fH)
 {
+	version = v;
 	tile = t;
 	smallImage = sI;
 	imageR = iR;
 	imageL = iL;
 	initialNCC = iNCC;	
 	finalNCC = fNCC;
+	glareNCC = gNCC;
 	initialHomography = new double[9];
 	finalHomography = new double[9];
 	for (int i = 0; i < 9; i++)
@@ -23,22 +26,44 @@ dataCollection::dataCollection(string t, string sI, string iR, string iL, int iN
 	}
 }
 
+dataCollection::dataCollection(char ** entry)
+{
+	version = atoi(entry[0]);
+	tile = entry[1];
+	smallImage = entry[2];
+	imageR = entry[3];
+	imageL = entry[4];
+	initialNCC = stof(entry[5]);
+	finalNCC = stof(entry[6]);
+	glareNCC = stof(entry[7]);
+	initialHomography = new double[9];
+	finalHomography = new double[9];
+	int count = 8;
+	for (int i = 0; i < 9; i++)
+	{
+		initialHomography[i] = (double)atoi(entry[count]);
+		finalHomography[i] = (double)atoi(entry[count+1]);
+		count += 2;
+	}
+
+}
+
 void dataCollection::writeEntry() //write entry to log file.
 {
 	ofstream stream;
-	stream.open("tileData.txt", std::ofstream::out | std::ofstream::app);
+	stream.open("test.txt", std::ofstream::out | std::ofstream::app);
 
+	stream << version << " ";
 	stream << tile << " ";
 	stream << smallImage << " ";
 	stream << imageR << " " << imageL << " ";
-	stream << initialNCC << " " << finalNCC << " ";
-	//stream << initialHomography << " " << finalHomography << "\n";
-	for (int i = 0; i < (signed)sizeof(initialHomography); i++)
+	stream << initialNCC << " " << finalNCC << " " << glareNCC << " ";
+	for (int i = 0; i < 9; i++)
 	{
 		stream << initialHomography[i] << " ";
 	}
 
-	for (int i = 0; i < (signed)sizeof(finalHomography); i++)
+	for (int i = 0; i < 9; i++)
 	{
 		stream << finalHomography[i] << " ";
 	}
@@ -48,32 +73,33 @@ void dataCollection::writeEntry() //write entry to log file.
 	stream.close();
 }
 
-void dataCollection::print() //print object to terminal
+void dataCollection::print() //print object to terminal or redirect to file
 {
-	cout << tile << " | ";
-	cout << smallImage << " | ";
-	cout << imageR << " | " << imageL << " | ";
-	cout << initialNCC << " | " << finalNCC << " | ";
-	//cout << initialHomography << " " << finalHomography << "\n";
-	for (int i = 0; i < (signed)sizeof(initialHomography); i++)
+	cout << version << " ";
+	cout << tile << " ";
+	cout << smallImage << " ";
+	cout << imageR << " " << imageL << " ";
+	cout << initialNCC << " " << finalNCC << " " << glareNCC << " ";
+	for (int i = 0; i < 9; i++)
 	{
-		cout << initialHomography[i] << " | ";
+		cout << initialHomography[i] << " ";
 	}
 
-	for (int i = 0; i < (signed)sizeof(finalHomography); i++)
+	for (int i = 0; i < 9; i++)
 	{
-		cout << finalHomography[i] << " | ";
+		cout << finalHomography[i] << " ";
 	}
 
 	cout << endl;
 }
 
-void checkFile(string condition, int index, vector<dataCollection> entries)
+vector<dataCollection> dataCollection::checkFile(string condition, int index) //static
 {
 	int entry_count = 0;
 	ifstream stream;
 	string line;
 	char ** parsed_line = new char * [1000];
+	vector<dataCollection> entries;
 
 	int numLines = 0;
 	ifstream in("test.txt");
@@ -87,23 +113,27 @@ void checkFile(string condition, int index, vector<dataCollection> entries)
 	{
 		line[sizeof(line)] = '\0';
 		parser(parsed_line, line);
-		cout << "Got here" << endl;
-		for (int i = 0; i < (signed)sizeof(parsed_line); i++)
+		if (parsed_line[index] == condition)
 		{
-			cout << parsed_line[i] << endl;
+			dataCollection entry(parsed_line);
+			entries.push_back(entry);
+			entry.print();
 		}
 		entry_count++;
 	}
 
 	stream.close();
+
+	return entries;
 }
 
-/*void checkFile(string condition1, string condition2, int initialIndex, vector<dataCollection> entries)
+vector<dataCollection> dataCollection::checkFile(string condition1, string condition2, int index)
 {
 	int entry_count = 0;
 	ifstream stream;
 	string line;
 	char ** parsed_line = new char * [1000];
+	vector<dataCollection> entries;
 
 	int numLines = 0;
 	ifstream in("test.txt");
@@ -115,19 +145,23 @@ void checkFile(string condition, int index, vector<dataCollection> entries)
 
 	while(getline(stream, line))
 	{
+		line[sizeof(line)] = '\0';
 		parser(parsed_line, line);
-		cout << "Got here" << endl;
-		for (int i = 0; i < (signed)sizeof(parsed_line); i++)
+		if (parsed_line[index] == condition1 && parsed_line[index+1] == condition2)
 		{
-			cout << parsed_line[i] << endl;
+			dataCollection entry(parsed_line);
+			entries.push_back(entry);
+			entry.print();
 		}
 		entry_count++;
 	}
 
 	stream.close();
-}*/
 
-vector<dataCollection> getAll() //Static. Returns a vector of every entry
+	return entries;
+}
+
+vector<dataCollection> dataCollection::getAll() //Static. Returns a vector of every entry
 {
 	vector<dataCollection> entries;
 	int entry_count = 0;
@@ -147,11 +181,11 @@ vector<dataCollection> getAll() //Static. Returns a vector of every entry
 	{
 		line[sizeof(line)] = '\0';
 		parser(parsed_line, line);
-		cout << "Got here" << endl;
-		for (int i = 0; i < (signed)sizeof(parsed_line); i++)
+		for (int count = 0; count < 26; count++)
 		{
-			cout << parsed_line[i] << endl;
+			cout << parsed_line[count] << " ";
 		}
+		cout << endl;
 		entry_count++;
 	}
 
@@ -159,30 +193,27 @@ vector<dataCollection> getAll() //Static. Returns a vector of every entry
 	return entries;
 }
 
-/*vector<dataCollection> dataCollection::getEntriesByImage(string i) //Static. Returns entries associated with given image.
+vector<dataCollection> dataCollection::getEntriesByVersion(int v) //static
 {
-	vector<dataCollection> entries;
-	checkFile(i, 2, entries);
-	return entries;
+	return checkFile(to_string(v), 0);
+}
+
+vector<dataCollection> dataCollection::getEntriesByImage(string i) //Static. Returns entries associated with given image.
+{
+	return checkFile(i, 2);
 }
 
 vector<dataCollection> dataCollection::getEntriesByImagePair(string i1, string i2) //Static. Returns entries associated with given image pair.
 {
-	vector<dataCollection> entries;
-	checkFile(i1, i2, 2, entries);
-	return entries;
+	return checkFile(i1, i2, 2);
 }
 
 vector<dataCollection> dataCollection::getEntriesByTile(string t) //Static. Returns entries associated with given tile
 {
-	vector<dataCollection> entries;
-	checkFile(t, 0, entries);
-	return entries;
+	return checkFile(t, 0);
 }
 
-vector<dataCollection> dataCollection::getEntriesByNCCRange(int iNCC, int fNCC) //Static. Returns entries between given range of NCC values.
+vector<dataCollection> dataCollection::getEntriesByNCCRange(float iNCC, float fNCC) //Static. Returns entries between given range of NCC values.
 {
-	vector<dataCollection> entries;
-	checkFile(to_string(iNCC), to_string(fNCC), 4, entries);
-	return entries;
-}*/
+	return checkFile(to_string(iNCC), to_string(fNCC), 4);
+}

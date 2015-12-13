@@ -8,9 +8,10 @@ int main()
 	{
 		m1[i] = m2[i] = 1;
 	}
-	dataCollection dC("hi", "he", "hr", "hw", 3, 4, m1, m2);
-	dataCollection::getAll();
-	dC.print();
+	dataCollection dC(1, "hi", "he", "hr", "hw", 0.95, 4, 5, m1, m2);
 	dC.writeEntry();
+	dC.print();
+	vector<dataCollection> entries;
+	entries = dataCollection::getEntriesByImagePair("he", "r");
 	return 0;
 }

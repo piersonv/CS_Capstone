@@ -14,8 +14,6 @@ int parser (char ** parsed_line, string input_string)
   int word_size = 0;
   int word_start = 0;
   int word_count = 0;
-
-  cout << input_string << nchars << endl;
  
   for (int char_count = 0; char_count < nchars; char_count++)
   {    
@@ -34,7 +32,6 @@ int parser (char ** parsed_line, string input_string)
       }
 
       parsed_line[word_count] = new char [word_size +1];
-      cout << word_size << endl;
 
       int word_char = 0;
       
@@ -45,10 +42,11 @@ int parser (char ** parsed_line, string input_string)
         word_char++;
       }
       parsed_line[word_count][word_size] = '\0';
-      cout << parsed_line[word_count] << endl;
       word_size = 0;
       word_count++;
     }
+
+    //cout << parsed_line[word_count] << endl;
 
     word_size++;
   
@@ -57,6 +55,9 @@ int parser (char ** parsed_line, string input_string)
       return 1;
     }     
   }
+
+  parsed_line[word_count] = new char [1];
+  parsed_line[word_count][0] = '\0';
 
   if (nchars <= 1 || word_count == 0)
   {
