@@ -1,7 +1,11 @@
+#ifndef _NCC_
+#define _NCC_
+
 #include <iostream>
 #include <vector>
 #include <cmath>
 #include "eriolHeader.h"
+#include "homography.h"
 using namespace std;
 
 void allocate_array(vector<int> & array_signal)
@@ -86,3 +90,5 @@ double calculate_normalized_correlation(const vector<Color> & first_signal, cons
 		return (double)correlation/correlation_scalar;
 	}
 }
+
+#endif

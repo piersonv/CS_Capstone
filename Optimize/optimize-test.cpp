@@ -7,6 +7,7 @@
 #include"time.h"
 #include<cstdlib>
 
+/*
 double calcNCC(vector<PixelLoc> *interior, double * current, Image *myimg, Image *myimgOther)
 {
 	Color black(0,0,0);
@@ -27,7 +28,7 @@ double calcNCC(vector<PixelLoc> *interior, double * current, Image *myimg, Image
          }
          return calculate_normalized_correlation(signal1, signal2);
 }
-
+*/
 
 int main(int argc, char **argv)
 {
@@ -36,19 +37,18 @@ int main(int argc, char **argv)
   double * current = new double[9];
   double * best = new double[9];
   double * init = new double[9];
-  float ncc;
-  float bestncc = -2;
-  float first;
-  double scale = 0.1;
-  bool initial = true;
+  double ncc;
+  double bestncc = -2;
+  double first;
+  double scale = 1;
   //int position = 0;
   //int direction = 1;
   bool optimize = true;
 
  cout << "Starting" << endl; 
  vector<PixelLoc> interior;
- for(int i=35; i<=92; ++i){
-	for(int j=35; j<=92; ++j){
+ for(int i=9; i<=23; ++i){
+	for(int j=9; j<=23; ++j){
 	PixelLoc point(i, j);
 	interior.push_back(point);
 	}
@@ -88,41 +88,10 @@ for(unsigned int i=0; i<interior.size(); ++i){
 }
 src.print("src.ppm");
 
-int count;
 cout << endl;
+
 if(optimize){
-	for(double i=1;i<=100000;i*=10){
-		count = 0;
- 		cout <<"Scale = " << (scale/i) << endl;
-		double offset = -50*(scale/i);
-		for(int l=0; l<2; ++l){
-			for(int k=0; k < 8; ++k){
-				for(int j=1; j<=100; ++j){
- 					ncc = calcNCC(&interior, current, &myimg, &myimgOther);
-					if (initial){
-						first = ncc;
-   						initial = false;
-					}
-					if (ncc > bestncc){
-						l=0;
-			   	       		++count;
-						bestncc = ncc;
-						best[k] = current[k];
-					}
-     				randHomography(k, init, current, offset + (scale/i)*j);
-    				}
-				for(int j=0; j<9; ++j){
-					init[j] = current[j] =  best[j];
-				}	
-			}
-			cout << "." << endl;
-		}
-		cout << "\nhomography: "; 
-		for(int i=0;i<9;++i){
-			cout << current[i] << " ";
- 		} 
-	 	cout << endl;
-	}
+	Optimize (scale, first, ncc, bestncc, &interior, init, current, best, &myimg, &myimgOther);
 }
  
  cout << "First: " << first << " Best: " << bestncc << endl;
@@ -133,36 +102,6 @@ if(optimize){
  cout << endl;
 Image imgFinal = myimg;
 
-for(unsigned int i=0; i<interior.size(); ++i){
-   homography(interior[i].x, interior[i].y, best, point);
-   double intpartx, fracpartx, intparty, fracparty, intfracx, intfracy;
-   fracpartx = modf(point[0], &intpartx);
-   fracparty = modf(point[1], &intparty);
-   intfracx = 1-fracpartx;
-   intfracy = 1-fracparty;
-   Color col1(0,0,255*(intfracx*intfracy));
-   Color col2(0,0,255*(fracpartx*intfracy));
-   Color col3(0,0,255*(fracparty*intfracx));
-   Color col4(0,0,255*(fracpartx*fracparty));
-   PixelLoc loc(intpartx, intparty);
-   PixelLoc loc2(intpartx+1, intparty);
-   PixelLoc loc3(intpartx, intparty+1);
-   PixelLoc loc4(intpartx+1, intparty+1);
-
-   if(inImage(&imgInitial,loc)){
-   	imgFinal.setPixel(loc,imgFinal.getPixel(loc)+col1);
-   }
-   if(inImage(&imgInitial,loc2)){
-   	imgFinal.setPixel(loc2,imgFinal.getPixel(loc2)+col2);
-   }
-   if(inImage(&imgInitial,loc3)){
-   	imgFinal.setPixel(loc3,imgFinal.getPixel(loc3)+col3);
-   }
-   if(inImage(&imgInitial,loc4)){
-   	imgFinal.setPixel(loc4,imgFinal.getPixel(loc4)+col4);
-   }
-
-}
-imgFinal.print("final.ppm");
+printHomographyTile(&imgFinal,&imgInitial,interior,best);
 system("/home/mscs/bin/show src.ppm initial.ppm final.ppm");
 }

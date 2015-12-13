@@ -10,14 +10,15 @@ private:
 	double * initialHomography, * finalHomography;
 	string smallImage, imageR, imageL;
 	string tile;
-	int initialNCC, finalNCC;
+	float initialNCC, finalNCC, glareNCC;
+	int version;
 
 	void checkFile(string condition, int index, vector<dataCollection> entries);
 	void checkFile(string condition1, string condition2, int initialIndex, vector<dataCollection> entries);
 
 public:
-	//dataCollection() {}
-	dataCollection(string t, string sI, string iR, string iL, int iNCC, int fNCC, double * iH, double * fH);
+	dataCollection(int v, string t, string sI, string iR, string iL, float iNCC, float fNCC, float gNCC, double * iH, double * fH);
+	dataCollection(char ** entry);
 	~dataCollection() {}
 
 	double * getInitialHomography() { return initialHomography; }
@@ -39,16 +40,23 @@ public:
 	void setInitialNCC(int iNCC) { initialNCC = iNCC; }
 
 	int getFinalNCC() { return finalNCC; }
-	void setFinalNCC(int fNCC) { finalNCC = fNCC; }
+	void setFinalNCC(float fNCC) { finalNCC = fNCC; }
+
+	int getGlareNCC() { return glareNCC; }
+	void setGlareNCC(float gNCC) { glareNCC = gNCC; }
 
 	void writeEntry(); //write entry to log file.
 
 	void print(); //print object to terminal
 
+	static vector<dataCollection> checkFile(string condition, int index);
+	static vector<dataCollection> checkFile(string condition1, string condition2, int index);
+
 	static vector<dataCollection> getAll(); //Returns a vector of every entry
-	/*static vector<dataCollection> getEntriesByImage(string i); //Returns entries associated with given image.
+	static std::vector<dataCollection> getEntriesByVersion(int v); //Returns vector of entries by version
+	static vector<dataCollection> getEntriesByImage(string i); //Returns entries associated with given image.
 	static vector<dataCollection> getEntriesByImagePair(string i1, string i2); //Returns entries associated with given image pair.
 	static vector<dataCollection> getEntriesByTile(string t); //Returns entries associated with given tile
-	static vector<dataCollection> getEntriesByNCCRange(int iNCC, int fNCC); //Returns entries between given range of NCC values.
-*/
+	static vector<dataCollection> getEntriesByNCCRange(float iNCC, float fNCC); //Returns entries between given range of NCC values.
+	static vector<dataCollection> getEntriesByGlareNCC(float gNCC);
 };
