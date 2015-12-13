@@ -21,24 +21,17 @@ __global__ void calculate_correlation_CUDA(int signal_size, const Color * first_
   double signal_correlationG = 0;
   double signal_correlationB = 0;
 
-  double sum_first_signalR = 0;
-  double sum_second_signalR = 0;
-  double sum_first_signalG = 0;
-  double sum_second_signalG = 0;
-  double sum_first_signalB = 0;
-  double sum_second_signalB = 0;
-
   signal_correlationR_thread[tid] = first_signal[tid].r*second_signal[tid].r;
   signal_correlationG_thread[tid] = first_signal[tid].g*second_signal[tid].g;
   signal_correlationB_thread[tid] = first_signal[tid].b*second_signal[tid].b;
 
-  first_signalR_ncc[tid] = first_signal[count].r * first_signal[count].r;
-  first_signalG_ncc[tid] = first_signal[count].g * first_signal[count].g;
-  first_signalB_ncc[tid] = first_signal[count].b * first_signal[count].b;
+  first_signalR_ncc[tid] = first_signal[tid].r * first_signal[tid].r;
+  first_signalG_ncc[tid] = first_signal[tid].g * first_signal[tid].g;
+  first_signalB_ncc[tid] = first_signal[tid].b * first_signal[tid].b;
 
-  second_signalR_ncc[tid] = second_signal[count].r * second_signal[count].r;   
-  second_signalG_ncc[tid] = second_signal[count].g * second_signal[count].g;    
-  second_signalB_ncc[tid] = second_signal[count].b * second_signal[count].b;
+  second_signalR_ncc[tid] = second_signal[tid].r * second_signal[tid].r;   
+  second_signalG_ncc[tid] = second_signal[tid].g * second_signal[tid].g;    
+  second_signalB_ncc[tid] = second_signal[tid].b * second_signal[tid].b;
 
   if(tid == 0){
     for (int i = 0; i < signal_size; i++){
