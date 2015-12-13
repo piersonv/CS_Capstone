@@ -21,24 +21,17 @@ __global__ void calculate_correlation_CUDA(int signal_size, const Color * first_
   double signal_correlationG = 0;
   double signal_correlationB = 0;
 
-  double sum_first_signalR = 0;
-  double sum_second_signalR = 0;
-  double sum_first_signalG = 0;
-  double sum_second_signalG = 0;
-  double sum_first_signalB = 0;
-  double sum_second_signalB = 0;
-
   signal_correlationR_thread[tid] = first_signal[tid].r*second_signal[tid].r;
   signal_correlationG_thread[tid] = first_signal[tid].g*second_signal[tid].g;
   signal_correlationB_thread[tid] = first_signal[tid].b*second_signal[tid].b;
 
-  first_signalR_ncc[tid] = first_signal[count].r * first_signal[count].r;
-  first_signalG_ncc[tid] = first_signal[count].g * first_signal[count].g;
-  first_signalB_ncc[tid] = first_signal[count].b * first_signal[count].b;
+  first_signalR_ncc[tid] = first_signal[tid].r * first_signal[tid].r;
+  first_signalG_ncc[tid] = first_signal[tid].g * first_signal[tid].g;
+  first_signalB_ncc[tid] = first_signal[tid].b * first_signal[tid].b;
 
-  second_signalR_ncc[tid] = second_signal[count].r * second_signal[count].r;   
-  second_signalG_ncc[tid] = second_signal[count].g * second_signal[count].g;    
-  second_signalB_ncc[tid] = second_signal[count].b * second_signal[count].b;
+  second_signalR_ncc[tid] = second_signal[tid].r * second_signal[tid].r;   
+  second_signalG_ncc[tid] = second_signal[tid].g * second_signal[tid].g;    
+  second_signalB_ncc[tid] = second_signal[tid].b * second_signal[tid].b;
 
   if(tid == 0){
     for (int i = 0; i < signal_size; i++){
@@ -136,7 +129,6 @@ double calcNCC(vector<PixelLoc> *interior, double * current, Image *myimg, Image
          return calculate_normalized_correlation_CUDA(signal_size, signal1, signal2);
 }
 
-
 int main(int argc, char **argv)
 {
   cout << "Starting" << endl;
@@ -144,19 +136,18 @@ int main(int argc, char **argv)
   double * current = new double[9];
   double * best = new double[9];
   double * init = new double[9];
-  float ncc;
-  float bestncc = -2;
-  float first;
-  double scale = 0.1;
-  bool initial = true;
+  double ncc;
+  double bestncc = -2;
+  double first;
+  double scale = 1;
   //int position = 0;
   //int direction = 1;
   bool optimize = true;
 
  cout << "Starting" << endl; 
  vector<PixelLoc> interior;
- for(int i=5; i<=10; ++i){
-  for(int j=5; j<=10; ++j){
+ for(int i=9; i<=23; ++i){
+  for(int j=9; j<=23; ++j){
   PixelLoc point(i, j);
   interior.push_back(point);
   }
@@ -196,39 +187,10 @@ for(unsigned int i=0; i<interior.size(); ++i){
 }
 src.print("src.ppm");
 
-int count;
 cout << endl;
+
 if(optimize){
-  for(double i=1;i<=1000000;i*=10){
-  count = 0;
-  cout <<"Scale = " << (scale/i) << endl;
-    
-  double offset = -50*(scale/i);
-  for(int l=0; l<2; ++l){
-  for(int k=0; k < 8; ++k){
-    for(int j=1; j<=100; ++j){
-      ncc = calcNCC(&interior, current, &myimg, &myimgOther);
-      if (initial){
-        first = ncc;
-          initial = false;
-      }
-      if (ncc > bestncc){
-        l=0;
-                ++count;
-        bestncc = ncc;
-        best[k] = current[k];
-      }
-        randHomography(k, init, current, offset + (scale/i)*j);
-        }
-    cout << "Count: " << count << endl;
-    count = 0;
-    for(int j=0; j<9; ++j){
-      init[j] = current[j] =  best[j];
-    } 
-  }
-  }
-  
-  }
+  Optimize (scale, first, ncc, bestncc, &interior, init, current, best, &myimg, &myimgOther);
 }
  
  cout << "First: " << first << " Best: " << bestncc << endl;
@@ -239,13 +201,6 @@ if(optimize){
  cout << endl;
 Image imgFinal = myimg;
 
-for(unsigned int i=0; i<interior.size(); ++i){
-   homography(interior[i].x, interior[i].y, best, point);
-   PixelLoc loc((int)point[0], (int)point[1]);
-   if(inImage(&imgInitial,loc)){
-      imgFinal.setPixel(loc,blue);
-   }
-}
-imgFinal.print("final.ppm");
+printHomographyTile(&imgFinal,&imgInitial,interior,best);
 system("/home/mscs/bin/show src.ppm initial.ppm final.ppm");
 }
