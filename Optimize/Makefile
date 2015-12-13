@@ -20,3 +20,5 @@ dataCollectionDriver.o: dataCollectionDriver.cpp dataCollection.h
 Optimize-Test: optimize-test.cpp eriolHeader.h eriolObjs.o NCCDemo.h homography.h
 	$(CC) $(OPTS) optimize-test.cpp eriolObjs.o $(LIBS) -o $@
 
+Optimize-test_CUDA: optimize-test_CUDA.cpp eriolHeader.h eriolObjs.o NCCDemo.h homography.h
+	/usr/local/cuda/bin/nvcc $(LIBS) -std=c++11 eriolObjs.o -o optimize-test_CUDA optimize-test_CUDA.cu
