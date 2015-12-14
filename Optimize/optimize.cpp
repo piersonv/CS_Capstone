@@ -3,6 +3,7 @@
 #include<string>
 #include"time.h"
 #include"glareReduction.h" 
+#include"dataCollection.h"
 #include<cstdlib>
 Tile &loadJustOneTile(const string &tileID, const string &imgName);
 vector<PixelLoc> getPixelsFor(int);
@@ -126,7 +127,8 @@ for(unsigned int i=0;i<fpDestination.size();++i){
         imgInitial.setPixel(loc,red);
    }
 }
-imgInitial.print("initial.ppm");
+string imagename = "TileImages/" + tile + "_initial.ppm";
+imgInitial.print(imagename.c_str());
 for(unsigned int i=0; i<interior.size(); ++i){
    if(inImage(&src,interior[i])){
       src.setPixel(interior[i],blue);
@@ -216,7 +218,10 @@ for(unsigned int i=0;i<fpDestination.size();++i){
       imgFinal.setPixel(loc,red);
    }
 }
-imgFinal.print("final.ppm");
-imageWithGlare.print("glare.ppm");
+dataCollection entry(1, tile, myimg, imageR, imageL, first, best, ncc_glare_reduced, myH1.m, best);
+imagename = "TileImages/" + tile + "_final.ppm";
+imgFinal.print(imagename.c_str());
+imagename = "TileImages/" + tile + "_glare.ppm";
+imageWithGlare.print(imagename.c_str());
 system("/home/mscs/bin/show src.ppm initial.ppm final.ppm glare.ppm");
 }
