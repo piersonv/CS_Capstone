@@ -34,12 +34,14 @@ int main(int argc, char **argv)
   vector<Coord> fpL = getFeaturePoints(tile, imageL);
    Matrix3x3 myH1;
    vector<PixelLoc> interior;
+   vector<PixelLoc> interiorOther;
    Image myimg;
    Image myimgOther;
 
   if (interiorR.size() > interiorL.size())
   {
     interior = getContour(tile, imageL);
+    interiorOther = getContour(tile, imageR);
     myH1  = getHomography(tile, imageL, imageR);
     myimg = imageR.c_str();
     smallerImage = imageR;
@@ -49,7 +51,8 @@ int main(int argc, char **argv)
   }
   else
   {
-    interior = getContour(tile, imageR);
+    interiorOther = getContour(tile, imageR);
+    interiorOther = getContour(tile, imageL);
     myH1  = getHomography(tile, imageR, imageL);
     myimg = imageL.c_str();
     smallerImage = imageL;
@@ -123,7 +126,7 @@ src.print("src.ppm");
 cout << endl;
 
 if(optimize){
-        Optimize (scale, first, ncc, bestncc, &interior, init, current, best, &myimg, &myimgOther);
+        Optimize (scale, first, ncc, bestncc, &interior, &interiorOther init, current, best, &myimg, &myimgOther);
 }
 
 
