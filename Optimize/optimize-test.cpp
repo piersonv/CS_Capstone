@@ -2,7 +2,7 @@
 #include<iostream>
 #include<string>
 #include"eriolHeader.h"
-#include"homography.h"
+#include"optimize.h"
 #include"NCCDemo.h"
 #include"time.h"
 #include<cstdlib>
