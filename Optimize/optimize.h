@@ -17,12 +17,12 @@ double calcNCC(vector<PixelLoc> *interior, double * current, Image *myimg, Image
         Coord mycoord(point[0], point[1]);
         if(inImage(myimg,mycoord)){
             signal1.push_back(asInterpolatedColor(mycoord, myimg));
+            signal2.push_back(myimgOther->getPixel(interior[0][i]));
         } else {
             signal1.push_back(black);
             signal2.push_back(white);
-            continue;
         }
-        signal2.push_back(myimgOther->getPixel(interior[0][i]));
+        cout << signal1[i] << " " << signal2[i] << " ";
     }
     return calculate_normalized_correlation(signal1, signal2);
 }
@@ -79,9 +79,9 @@ void Optimize(double scale, double &first, double &ncc, double &bestncc, vector<
         for(int l=0; l<2; ++l){
             for(int k=0; k < 8; ++k){
                 for(int j=1; j<=100; ++j){
-                    ncc = calcNCC(interior, current, myimg, myimgOther);
+                    ncc = calcNCC(interior, current, myimg, myimgOther, j);
                     if (initial){
-                        first = ncc;
+                        first = ncc; 
                         initial = false;
                     }
                     if (ncc > bestncc){
@@ -106,6 +106,9 @@ void Optimize(double scale, double &first, double &ncc, double &bestncc, vector<
         cout << endl;
         if(!success){
             ++failures;
+        }
+        else{
+            failures=0;
         }
         //printHomographyTile(myimg, myimg, *interior, best);
         //system("/home/mscs/bin/show final.ppm"); 
