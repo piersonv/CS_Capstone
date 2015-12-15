@@ -7,7 +7,7 @@
 using namespace std;
 
 
-dataCollection::dataCollection(int v, string t, string sI, string iR, string iL, float iNCC, float fNCC, float gNCC, double * iH, double * fH)
+dataCollection::dataCollection(int v, string t, string sI, string iR, string iL, double iNCC, double fNCC, double gNCC, double * iH, double * fH)
 {
 	version = v;
 	tile = t;
@@ -33,9 +33,9 @@ dataCollection::dataCollection(char ** entry)
 	smallImage = entry[2];
 	imageR = entry[3];
 	imageL = entry[4];
-	initialNCC = stof(entry[5]);
-	finalNCC = stof(entry[6]);
-	glareNCC = stof(entry[7]);
+	initialNCC = stod(entry[5]);
+	finalNCC = stod(entry[6]);
+	glareNCC = stod(entry[7]);
 	initialHomography = new double[9];
 	finalHomography = new double[9];
 	int count = 8;
@@ -102,12 +102,12 @@ vector<dataCollection> dataCollection::checkFile(string condition, int index) //
 	vector<dataCollection> entries;
 
 	int numLines = 0;
-	ifstream in("test.txt");
+	ifstream in("tileData.txt");
 	std::string unused;
 	while ( getline(in, unused) )
 	   ++numLines;
 
-	stream.open("test.txt", std::ofstream::in);
+	stream.open("tileData.txt", std::ofstream::in);
 
 	while(getline(stream, line))
 	{
@@ -136,12 +136,12 @@ vector<dataCollection> dataCollection::checkFile(string condition1, string condi
 	vector<dataCollection> entries;
 
 	int numLines = 0;
-	ifstream in("test.txt");
+	ifstream in("tileData.txt");
 	std::string unused;
 	while ( getline(in, unused) )
 	   ++numLines;
 
-	stream.open("test.txt", std::ofstream::in);
+	stream.open("tileData.txt", std::ofstream::in);
 
 	while(getline(stream, line))
 	{
@@ -170,12 +170,12 @@ vector<dataCollection> dataCollection::getAll() //Static. Returns a vector of ev
 	char ** parsed_line = new char * [1000];
 
 	int numLines = 0;
-	ifstream in("test.txt");
+	ifstream in("tileData.txt");
 	std::string unused;
 	while ( getline(in, unused) )
 	   ++numLines;
 
-	stream.open("test.txt", std::ofstream::in);
+	stream.open("tileData.txt", std::ofstream::in);
 
 	while(getline(stream, line))
 	{

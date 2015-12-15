@@ -10,14 +10,14 @@ private:
 	double * initialHomography, * finalHomography;
 	string smallImage, imageR, imageL;
 	string tile;
-	float initialNCC, finalNCC, glareNCC;
+	double initialNCC, finalNCC, glareNCC;
 	int version;
 
 	void checkFile(string condition, int index, vector<dataCollection> entries);
 	void checkFile(string condition1, string condition2, int initialIndex, vector<dataCollection> entries);
 
 public:
-	dataCollection(int v, string t, string sI, string iR, string iL, float iNCC, float fNCC, float gNCC, double * iH, double * fH);
+	dataCollection(int v, string t, string sI, string iR, string iL, double iNCC, double fNCC, double gNCC, double * iH, double * fH);
 	dataCollection(char ** entry);
 	~dataCollection() {}
 
@@ -36,11 +36,11 @@ public:
 	string getSmallImage() { return smallImage; }
 	void setSmallImage(string sI) { smallImage = sI; }
 
-	int getInitialNCC() { return initialNCC; }
-	void setInitialNCC(int iNCC) { initialNCC = iNCC; }
+	double getInitialNCC() { return initialNCC; }
+	void setInitialNCC(double iNCC) { initialNCC = iNCC; }
 
-	int getFinalNCC() { return finalNCC; }
-	void setFinalNCC(float fNCC) { finalNCC = fNCC; }
+	double getFinalNCC() { return finalNCC; }
+	void setFinalNCC(double fNCC) { finalNCC = fNCC; }
 
 	int getGlareNCC() { return glareNCC; }
 	void setGlareNCC(float gNCC) { glareNCC = gNCC; }

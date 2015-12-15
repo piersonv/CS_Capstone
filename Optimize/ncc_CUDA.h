@@ -124,7 +124,7 @@ double calculate_normalized_correlation_CUDA(int signal_size, const Color * firs
   }
 }
 
-double calcNCC(vector<PixelLoc> *interior, double * current, Image *myimg, Image *myimgOther, int count)
+double calcNCC(vector<PixelLoc> *interior, double * current, Image *myimg, Image *myimgOther)
 {
   int signal_size = interior->size();
   Color black(0,0,0);

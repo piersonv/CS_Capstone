@@ -18,8 +18,6 @@ int main(int argc, char **argv)
   double bestncc = -2;
   double first;
   double scale = 1;
-  //int position = 0;
-  //int direction = 1;
   bool optimize = true;
 
  vector<PixelLoc> interior;
