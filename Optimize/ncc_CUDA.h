@@ -146,4 +146,27 @@ double calcNCC(vector<PixelLoc> *interior, double * current, Image *myimg, Image
   return calculate_normalized_correlation_CUDA(signal_size, signal1, signal2);
 }
 
+double calcNCCInv(vector<PixelLoc> *interior, double * current, Image *myimg, Image *myimgOther)
+{
+    int signal_size = interior->size();
+    Color black(0,0,0);
+    Color white(255,255,255);
+    Color signal1[signal_size], signal2[signal_size];
+    double point[2];
+    double inverse[9];
+    inverse_homography(inverse, current);
+    for(unsigned int i=0; i<signal_size; ++i){
+        homography(interior[0][i].x + 0.5 , interior[0][i].y + 0.5, inverse, point);
+        Coord mycoord(point[0], point[1]);
+        if(inImage(myimg,mycoord)){
+          signal1[i] = asInterpolatedColor(mycoord, myimg);
+          signal2[i] = myimgOther->getPixel(interior[0][i]);
+      } else {
+          signal1[i] = black;
+          signal2[i] = white;
+      }
+    }
+    return calculate_normalized_correlation_CUDA(signal_size, signal1, signal2);
+}
+
 #endif

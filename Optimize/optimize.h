@@ -157,7 +157,7 @@ void Optimize(double scale, double &first, double &ncc, double &bestncc, vector<
                 for(int j=1; j<=100; ++j){
                     ncc1 = calcNCC(interior, current, myimg, myimgOther);
                     ncc2 = calcNCCInv(interiorOther, current, myimgOther, myimg);
-        		    ncc = (ncc1+ncc2)/2
+        		    ncc = (ncc1+ncc2)/2;
          		    if (initial){
                         first = ncc;
                         initial = false;
