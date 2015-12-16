@@ -34,17 +34,21 @@ int main(int argc, char **argv)
   interior.push_back(point);
   }
  }
-cout << "Creating Images" << endl;
+cout << "Creating Images";
  Image myimg("test-initial.ppm");
  Image myimgOther("test-final.ppm");
-cout << "Images created" << endl;
+cout << "Images created";
  for(int i=0;i<9;++i){
     init[i] = current[i] = best[i] = 0; 
  }
     init[8] = current[8] = best[8] = 1;
     init[0] = current[0] = best[0] = 1;
     init[4] = current[4] = best[4] = 1;
-  
+
+  cout << "initial homography: " << endl;
+  for (int i = 0; i < 9; i++){
+    cout << init[i] << " ";
+  }
 
 Color red(255,0,0);
 Color blue(0,0,100);

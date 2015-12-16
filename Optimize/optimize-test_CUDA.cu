@@ -44,7 +44,12 @@ cout << "Images created" << endl;
     init[8] = current[8] = best[8] = 1;
     init[0] = current[0] = best[0] = 1;
     init[4] = current[4] = best[4] = 1;
-  
+
+  cout << "initial homography: ";
+  for (int i = 0; i < 9; i++){
+    cout << init[i] << " ";
+  }
+  cout << endl;
 
 Color red(255,0,0);
 Color blue(0,0,100);
