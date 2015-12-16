@@ -21,8 +21,8 @@ dataCollection::dataCollection(int v, string t, string sI, string iR, string iL,
 	finalHomography = new double[9];
 	for (int i = 0; i < 9; i++)
 	{
-		initialHomography[i] = iH[0];
-		finalHomography[i] = fH[0];
+		initialHomography[i] = iH[i];
+		finalHomography[i] = fH[i];
 	}
 }
 
@@ -51,7 +51,7 @@ dataCollection::dataCollection(char ** entry)
 void dataCollection::writeEntry() //write entry to log file.
 {
 	ofstream stream;
-	stream.open("test.txt", std::ofstream::out | std::ofstream::app);
+	stream.open("tileData.txt", std::ofstream::out | std::ofstream::app);
 
 	stream << version << " ";
 	stream << tile << " ";

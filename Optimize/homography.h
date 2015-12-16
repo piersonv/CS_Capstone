@@ -53,10 +53,15 @@ void randHomography(double* h, double* temp, long now, double scale=0.00001){
                 offset = (rand() % 200 - 100) * scale;
                 temp[i] = h[i] + offset;
         }
+
 }
+
 void randHomography(int position, double* k, double* h, double scale){
 	h[position] = k[position] + (scale);
 }
 
+void randHomography(int direction, int position, double* k, double* h, double scale){
+	h[position] = k[position] + (direction*scale);
+}
 
 #endif
