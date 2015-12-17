@@ -11,7 +11,7 @@
 int main(int argc, char **argv)
 {
   cout << "Starting" << endl;
-  double point[2];
+  //double point[2];
   double * current = new double[9];
   double * best = new double[9];
   double * init = new double[9];
