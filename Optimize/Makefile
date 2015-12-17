@@ -5,21 +5,15 @@ CC=g++
 #LIBS = -lm
 LIBS = -L/home/cg/palantir/levmar/levmar-2.5 -llevmar -lm
 
-<<<<<<< HEAD
-Optimize: optimize.cpp eriolHeader.h eriolObjs.o NCCDemo.h homography.h glareReduction.h dataCollection.o
-	$(CC) $(OPTS) optimize.cpp dataCollection.o eriolObjs.o $(LIBS) -o $@
-=======
 Optimize: optimize.cpp eriolHeader.h eriolObjs.o NCCDemo.h homography.h optimize.h glareReduction.h dataCollection.o
 	$(CC) $(OPTS) optimize.cpp dataCollection.o eriolObjs.o $(LIBS) -o $@
 testall: testall.cpp eriolHeader.h eriolObjs.o 
 	$(CC) $(OPTS) testall.cpp eriolObjs.o $(LIBS) -o $@
 
->>>>>>> f98390e9c45457465c44ff3eb324196a3bca5c44
-
 dataCollection.o: dataCollection.cpp dataCollection.h
 	g++ -g -Wall -std=c++11 -c dataCollection.cpp
 
-Optimize-Test: optimize-test.cpp eriolHeader.h eriolObjs.o NCCDemo.h homography.h
+Optimize-Test: optimize-test.cpp eriolHeader.h eriolObjs.o NCCDemo.h homography.h glareReduction.h
 	$(CC) $(OPTS) optimize-test.cpp eriolObjs.o $(LIBS) -o $@
 
 Optimize-test_CUDA: optimize-test_CUDA.cpp eriolHeader.h eriolObjs.o NCCDemo.h homography.h

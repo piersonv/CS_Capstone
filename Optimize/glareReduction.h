@@ -25,7 +25,7 @@ void detectGlare(vector<Color> * colors, vector<Color> * colors2, vector<bool> *
 	}
 }
 
-int calculateNCCWithoutGlare(vector<PixelLoc> *interior, double * best, Image *myimg, Image *myimgOther, Image *glareImage)
+double calculateNCCWithoutGlare(vector<PixelLoc> *interior, double * best, Image *myimg, Image *myimgOther, Image *glareImage)
 {
 	vector<bool> glarePixels; 
 	Color black(0,0,0);
@@ -49,25 +49,16 @@ int calculateNCCWithoutGlare(vector<PixelLoc> *interior, double * best, Image *m
 	
 	detectGlare(&signal1, &signal2, &glarePixels);
 
-	Color dummy;
 	vector<Color> image1;
 	vector<Color> image2;
 	Color blue(0,0,100);
-
-	image1.push_back(dummy);
-	image2.push_back(dummy);
-
-	int NCC = 0; 
-	int count = 0;
 
 	for (unsigned int pixel_count = 0; pixel_count < signal1.size(); pixel_count++)
 	{
 		if (glarePixels[pixel_count] != true)
 		{
-			image1[0] = signal1[pixel_count];
-			image2[0] = signal2[pixel_count];
-			NCC += calculate_normalized_correlation(image1, image2);
-			count++;
+			image1.push_back(signal1[pixel_count]);
+			image2.push_back(signal2[pixel_count]);
 		}
 		else
 		{
@@ -77,5 +68,7 @@ int calculateNCCWithoutGlare(vector<PixelLoc> *interior, double * best, Image *m
 		}
 	}
 
-	return NCC/count;
+	cout << image1 << endl;
+	cout << image2 << endl;
+	return calculate_normalized_correlation(image1, image2);
 }

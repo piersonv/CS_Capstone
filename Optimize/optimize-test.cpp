@@ -30,7 +30,7 @@ int main(int argc, char **argv)
  }
 
  Image myimg("test-initial.ppm");
- Image myimgOther("test-final.ppm");
+ Image myimgOther("glare.ppm");
 
  for(int i=0;i<9;++i){
 		init[i] = current[i] = best[i] = 0; 
@@ -71,7 +71,7 @@ if(optimize){
 }
  Image imageWithGlare = myimg;
  double ncc_glare_reduced = calculateNCCWithoutGlare(&interior, best, &myimg, &myimgOther, &imageWithGlare);
- cout << "First: " << first << " Best: " << bestncc <<  "Glare Reduced: " << ncc_glare_reduced << endl;
+ cout << "First: " << first << " Best: " << bestncc <<  " Glare Reduced: " << ncc_glare_reduced << endl;
  cout << "homography: "; 
  for(int i=0;i<9;++i){
 	cout << current[i] << " ";
