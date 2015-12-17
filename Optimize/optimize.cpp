@@ -45,7 +45,7 @@ int main(int argc, char **argv)
     interiorOther = getContour(tile, imageR);
     myH1  = getHomography(tile, imageL, imageR);
     myimg = imageR.c_str();
-    smallerImage = imageR;
+    smallerImage = imageL;
     myimgOther = imageL.c_str();
     fpSource = getFeaturePoints(tile, imageL); 
     fpDestination = getFeaturePoints(tile, imageR); 
@@ -56,7 +56,7 @@ int main(int argc, char **argv)
     interiorOther = getContour(tile, imageL);
     myH1  = getHomography(tile, imageR, imageL);
     myimg = imageL.c_str();
-    smallerImage = imageL;
+    smallerImage = imageR;
     myimgOther = imageR.c_str();
     fpSource = getFeaturePoints(tile, imageR);
     fpDestination = getFeaturePoints(tile, imageL);
@@ -168,6 +168,7 @@ for(unsigned int i=0;i<fpDestination.size();++i){
       imgFinal.setPixel(loc,red);
    }
 }
+
 dataCollection entry(1, tile, smallerImage, imageR, imageL, first, bestncc, ncc_glare_reduced, myH1.m, best);
 entry.writeEntry();
 string imagenamefinal = imagedir + tile + "_final.ppm";

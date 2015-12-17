@@ -22,7 +22,6 @@ double calcNCC(vector<PixelLoc> *interior, double * current, Image *myimg, Image
             signal1.push_back(black);
             signal2.push_back(white);
         }
-        //cout << signal1[i] << " " << signal2[i] << " ";
     }
     return calculate_normalized_correlation(signal1, signal2);
 }
