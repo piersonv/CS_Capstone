@@ -24,7 +24,7 @@ int main(int argc, char **argv)
   double ncc;
   double bestncc = -2;
   double first;
-  double scale = 0.01;
+  double scale = 0.001;
   bool optimize = true;
 
   vector<PixelLoc> interiorR = getContour(tile, imageR);
@@ -45,18 +45,18 @@ int main(int argc, char **argv)
     interiorOther = getContour(tile, imageR);
     myH1  = getHomography(tile, imageL, imageR);
     myimg = imageR.c_str();
-    smallerImage = imageR;
+    smallerImage = imageL;
     myimgOther = imageL.c_str();
     fpSource = getFeaturePoints(tile, imageL); 
     fpDestination = getFeaturePoints(tile, imageR); 
   }
   else
   {
-    interiorOther = getContour(tile, imageR);
+    interior = getContour(tile, imageR);
     interiorOther = getContour(tile, imageL);
     myH1  = getHomography(tile, imageR, imageL);
     myimg = imageL.c_str();
-    smallerImage = imageL;
+    smallerImage = imageR;
     myimgOther = imageR.c_str();
     fpSource = getFeaturePoints(tile, imageR);
     fpDestination = getFeaturePoints(tile, imageL);
@@ -128,8 +128,10 @@ string imagenamesrc = imagedir + tile + "_src.ppm";
 //cout << endl;
 
 if(optimize){
-//Slow Version        Optimize (scale, first, ncc, bestncc, &interior, &interiorOther init, current, best, &myimg, &myimgOther);
-        Optimize (scale, first, ncc, bestncc, &interior, current, best, &myimg, &myimgOther);
+//Slow Inv Version  Optimize (scale, first, ncc, bestncc, &interior, &interiorOther, init, current, best, &myimg, &myimgOther);
+//Normal fast version        Optimize (scale, first, ncc, bestncc, &interior, current, best, &myimg, &myimgOther);
+//Inv fast version
+        Optimize (scale, first, ncc, bestncc, &interior, &interiorOther, current, best, &myimg, &myimgOther);
 }
 
 
@@ -166,6 +168,7 @@ for(unsigned int i=0;i<fpDestination.size();++i){
       imgFinal.setPixel(loc,red);
    }
 }
+
 dataCollection entry(1, tile, smallerImage, imageR, imageL, first, bestncc, ncc_glare_reduced, myH1.m, best);
 entry.writeEntry();
 string imagenamefinal = imagedir + tile + "_final.ppm";

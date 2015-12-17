@@ -52,8 +52,9 @@ double calcNCCInv(vector<PixelLoc> *interior, double * current, Image *myimg, Im
 
 #endif
 
-void printHomographyTile(Image *imgFinal, Image *imgInitial, vector<PixelLoc> interior, double *best){
+void printHomographyTile(string name, Image *imgFinal, vector<PixelLoc> interior, double *best){
     double point[2];
+    name += ".ppm";
     for(unsigned int i=0; i<interior.size(); ++i){
         homography(interior[i].x, interior[i].y, best, point);
         double intpartx, fracpartx, intparty, fracparty, intfracx, intfracy;
@@ -70,21 +71,21 @@ void printHomographyTile(Image *imgFinal, Image *imgInitial, vector<PixelLoc> in
         PixelLoc loc3(intpartx, intparty+1);
         PixelLoc loc4(intpartx+1, intparty+1);
 
-        if(inImage(imgInitial,loc)){
+        if(inImage(imgFinal,loc)){
             imgFinal->setPixel(loc,imgFinal->getPixel(loc)+col1);
         }
-        if(inImage(imgInitial,loc2)){
+        if(inImage(imgFinal,loc2)){
             imgFinal->setPixel(loc2,imgFinal->getPixel(loc2)+col2);
         }
-        if(inImage(imgInitial,loc3)){
+        if(inImage(imgFinal,loc3)){
             imgFinal->setPixel(loc3,imgFinal->getPixel(loc3)+col3);
         }
-        if(inImage(imgInitial,loc4)){
+        if(inImage(imgFinal,loc4)){
             imgFinal->setPixel(loc4,imgFinal->getPixel(loc4)+col4);
         }
 
     }
-    imgFinal->print("final.ppm");
+    imgFinal->print(name.c_str());
 }
 
 
@@ -191,6 +192,10 @@ void Optimize(double scale, double &first, double &ncc, double &bestncc, vector<
     }
 }
 
+//
+//Fast version
+//
+
 void Optimize(double scale, double &first, double &ncc, double &bestncc, vector<PixelLoc> *interior, double * current, double * best, Image *myimg, Image *myimgOther){
   bool initial = true;
   bool success = true;
@@ -244,4 +249,66 @@ void Optimize(double scale, double &first, double &ncc, double &bestncc, vector<
  //   cout << "\nCount: " << count << endl;
   }
 }
+
+//
+//Fast Version with inverse
+//
+void Optimize(double scale, double &first, double &ncc, double &bestncc, vector<PixelLoc> *interior, vector<PixelLoc> *interiorOther, double * current, double * best, Image *myimg, Image *myimgOther){
+  bool initial = true;
+  bool success = true;
+  double ncc1,ncc2;
+  int position = 0;
+  int direction = 0;
+  int i=1;
+  int failures = 0;
+  while(failures<2){
+    success = false;
+    i*=10;
+    int count=0;
+    //cout <<"Scale = " << (scale/i) << endl;
+    for(int l=0; l<2; ++l){
+      for(int j=0; j<50; ++j){
+        ncc1 = calcNCC(interior, current, myimg, myimgOther);
+        ncc2 = calcNCCInv(interiorOther, current, myimgOther, myimg);
+        ncc = (ncc1+ncc2)/2;
+ 	if (initial){
+	  first = ncc;
+	  initial = false;
+	}
+	if ((ncc-bestncc)>(scale/(i*10))){
+	  l=0;
+	  ++count;
+	  success=true;
+	  bestncc = ncc;
+	  best[position] = current[position];
+	  best[(position+1)%7] = current[(position+1)%7];
+	  best[(position-1)%7] = current[(position-1)%7];
+          //cout << "." << flush;	  
+	}else{
+	  if(direction == -1){
+	    direction = 1;
+	    if (position == 7){
+	      position = 0;
+	    }else{
+	      ++position;
+	    }
+	  }else{
+	    direction = -1;
+	  }
+	  
+	}
+	randHomography(direction, position, best, current, scale/i);
+      	}
+	//cout << bestncc << endl;
+    }	
+    if(!success){
+      ++failures;
+    }else{
+      failures=0;
+    }
+ //   cout << "\nCount: " << count << endl;
+  }
+}
+
+
 #endif
