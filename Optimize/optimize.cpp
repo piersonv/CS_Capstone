@@ -16,6 +16,7 @@ int main(int argc, char **argv)
   string imageR = image+"R";
   string imageL = image+"L";
   string smallerImage;
+  string imagedir = "/project/npa/capImages/"; 
   double point[2];
   double * current = new double[9];
   double * best = new double[9];
@@ -85,10 +86,10 @@ int main(int argc, char **argv)
   	}
   	init[8] = current[8] = best[8] = 1;
   }
-  cout << "Original Feature points: " ;
-  for(unsigned int i=0;i<fpDestination.size();++i){
-        cout << fpDestination[i] << " ";
-  }
+  //cout << "Original Feature points: " ;
+  //for(unsigned int i=0;i<fpDestination.size();++i){
+  //      cout << fpDestination[i] << " ";
+  //}
 
 Color red(255,0,0);
 Color blue(0,0,100);
@@ -109,8 +110,8 @@ for(unsigned int i=0;i<fpDestination.size();++i){
         imgInitial.setPixel(loc,red);
    }
 }
-string imagename = "TileImages/" + tile + "_initial.ppm";
-imgInitial.print(imagename.c_str());
+string imagenameinitial = imagedir + tile + "_initial.ppm";
+imgInitial.print(imagenameinitial.c_str());
 for(unsigned int i=0; i<interior.size(); ++i){
    if(inImage(&src,interior[i])){
       src.setPixel(interior[i],blue);
@@ -122,11 +123,13 @@ for(unsigned int i=0;i<fpDestination.size();++i){
        src.setPixel(loc,red);
    }
 }
-src.print("src.ppm");
-cout << endl;
+string imagenamesrc = imagedir + tile + "_src.ppm";
+//src.print(imagenamesrc.c_str());
+//cout << endl;
 
 if(optimize){
-        Optimize (scale, first, ncc, bestncc, &interior, &interiorOther init, current, best, &myimg, &myimgOther);
+//Slow Version        Optimize (scale, first, ncc, bestncc, &interior, &interiorOther init, current, best, &myimg, &myimgOther);
+        Optimize (scale, first, ncc, bestncc, &interior, current, best, &myimg, &myimgOther);
 }
 
 
@@ -134,19 +137,19 @@ Image imageWithGlare = myimg;
 
 
  double ncc_glare_reduced = calculateNCCWithoutGlare(&interior, best, &myimg, &myimgOther, &imageWithGlare);
- cout << "First: " << first << " Best: " << bestncc <<  "Glare Reduced: " << ncc_glare_reduced << endl;
- cout << "homography: "; 
- for(int i=0;i<9;++i){
-	cout << current[i] << " ";
- } 
- cout << endl;
+ //cout << "First: " << first << " Best: " << bestncc <<  "Glare Reduced: " << ncc_glare_reduced << endl;
+// cout << "homography: "; 
+// for(int i=0;i<9;++i){
+//	cout << current[i] << " ";
+// } 
+// cout << endl;
 
- cout << endl << "Optimized Feature points: ";
- for(unsigned int i=0;i<fpDestination.size();++i){
-      homography(fpSource[i].x,fpSource[i].y, best, point);
-      cout << point[0] << "," << point[1] << " ";
- } 
- cout << endl;
+// cout << endl << "Optimized Feature points: ";
+// for(unsigned int i=0;i<fpDestination.size();++i){
+//      homography(fpSource[i].x,fpSource[i].y, best, point);
+//      cout << point[0] << "," << point[1] << " ";
+// } 
+// cout << endl;
 Image imgFinal = myimg;
 
 for(unsigned int i=0; i<interior.size(); ++i){
@@ -164,9 +167,12 @@ for(unsigned int i=0;i<fpDestination.size();++i){
    }
 }
 dataCollection entry(1, tile, smallerImage, imageR, imageL, first, bestncc, ncc_glare_reduced, myH1.m, best);
-imagename = "TileImages/" + tile + "_final.ppm";
-imgFinal.print(imagename.c_str());
-imagename = "TileImages/" + tile + "_glare.ppm";
-imageWithGlare.print(imagename.c_str());
-system("/home/mscs/bin/show src.ppm initial.ppm final.ppm glare.ppm");
+entry.writeEntry();
+string imagenamefinal = imagedir + tile + "_final.ppm";
+imgFinal.print(imagenamefinal.c_str());
+string imagenameglare = imagedir + tile + "_glare.ppm";
+imageWithGlare.print(imagenameglare.c_str());
+
+string imagepaths = "/home/mscs/bin/show " + imagenamesrc + " " + imagenameinitial + " " + imagenamefinal + " " + imagenameglare;
+//system(imagepaths.c_str());
 }

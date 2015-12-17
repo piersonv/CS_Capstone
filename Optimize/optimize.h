@@ -156,8 +156,8 @@ void Optimize(double scale, double &first, double &ncc, double &bestncc, vector<
                 for(int j=1; j<=100; ++j){
                     ncc1 = calcNCC(interior, current, myimg, myimgOther);
                     ncc2 = calcNCCInv(interiorOther, current, myimgOther, myimg);
-        		    ncc = (ncc1+ncc2)/2;
-         		    if (initial){
+		    ncc = (ncc1+ncc2)/2;
+ 		    if (initial){
                         first = ncc;
                         initial = false;
                     }
@@ -189,5 +189,59 @@ void Optimize(double scale, double &first, double &ncc, double &bestncc, vector<
         //printHomographyTile(myimg, myimg, *interior, best);
         //system("/home/mscs/bin/show final.ppm"); 
     }
+}
+
+void Optimize(double scale, double &first, double &ncc, double &bestncc, vector<PixelLoc> *interior, double * current, double * best, Image *myimg, Image *myimgOther){
+  bool initial = true;
+  bool success = true;
+  int position = 0;
+  int direction = 0;
+  int i=1;
+  int failures = 0;
+  while(failures<2){
+    success = false;
+    i*=10;
+    int count=0;
+    //cout <<"Scale = " << (scale/i) << endl;
+    for(int l=0; l<2; ++l){
+      for(int j=0; j<50; ++j){
+	ncc = calcNCC(interior, current, myimg, myimgOther);
+	if (initial){
+	  first = ncc;
+	  initial = false;
+	}
+	if ((ncc-bestncc)>(scale/(i*10))){
+	  l=0;
+	  ++count;
+	  success=true;
+	  bestncc = ncc;
+	  best[position] = current[position];
+	  best[(position+1)%7] = current[(position+1)%7];
+	  best[(position-1)%7] = current[(position-1)%7];
+          //cout << "." << flush;	  
+	}else{
+	  if(direction == -1){
+	    direction = 1;
+	    if (position == 7){
+	      position = 0;
+	    }else{
+	      ++position;
+	    }
+	  }else{
+	    direction = -1;
+	  }
+	  
+	}
+	randHomography(direction, position, best, current, scale/i);
+      	}
+	//cout << bestncc << endl;
+    }	
+    if(!success){
+      ++failures;
+    }else{
+      failures=0;
+    }
+ //   cout << "\nCount: " << count << endl;
+  }
 }
 #endif
