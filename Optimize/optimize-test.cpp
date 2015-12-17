@@ -5,6 +5,7 @@
 #include"optimize.h"
 #include"NCCDemo.h"
 #include"time.h"
+#include"glareReduction.h" 
 #include<cstdlib>
 
 int main(int argc, char **argv)
@@ -29,8 +30,10 @@ int main(int argc, char **argv)
 	interior.push_back(point);
 	}
  }
+
  Image myimg("test-initial.ppm");
  Image myimgOther("test-final.ppm");
+
  for(int i=0;i<9;++i){
 		init[i] = current[i] = best[i] = 0; 
  }
@@ -53,7 +56,8 @@ for(unsigned int i=0; i<interior.size(); ++i){
    }
 }
 
-imgInitial.print("initial.ppm");
+string imagename = "TileImages/test_initial.ppm";
+imgInitial.print(imagename.c_str());
 
 for(unsigned int i=0; i<interior.size(); ++i){
    if(inImage(&src,interior[i])){
@@ -67,8 +71,9 @@ cout << endl;
 if(optimize){
 	Optimize (scale, first, ncc, bestncc, &interior, init, current, best, &myimg, &myimgOther);
 }
- 
- cout << "First: " << first << " Best: " << bestncc << endl;
+ Image imageWithGlare = myimg;
+ double ncc_glare_reduced = calculateNCCWithoutGlare(&interior, best, &myimg, &myimgOther, &imageWithGlare);
+ cout << "First: " << first << " Best: " << bestncc <<  "Glare Reduced: " << ncc_glare_reduced << endl;
  cout << "homography: "; 
  for(int i=0;i<9;++i){
 	cout << current[i] << " ";
@@ -78,4 +83,9 @@ Image imgFinal = myimg;
 
 printHomographyTile(&imgFinal,&imgInitial,interior,best);
 system("/home/mscs/bin/show src.ppm initial.ppm final.ppm");
+imagename = "TileImages/test_final.ppm";
+imgFinal.print(imagename.c_str());
+imagename = "TileImages/test_glare.ppm";
+imageWithGlare.print(imagename.c_str());
+system("/home/mscs/bin/show src.ppm initial.ppm final.ppm glare.ppm");
 }

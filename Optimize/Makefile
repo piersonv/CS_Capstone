@@ -6,7 +6,7 @@ CC=g++
 LIBS = -L/home/cg/palantir/levmar/levmar-2.5 -llevmar -lm
 
 Optimize: optimize.cpp eriolHeader.h eriolObjs.o NCCDemo.h homography.h glareReduction.h dataCollection.o
-	$(CC) $(OPTS) optimize.cpp eriolObjs.o $(LIBS) -o $@
+	$(CC) $(OPTS) optimize.cpp dataCollection.o eriolObjs.o $(LIBS) -o $@
 
 dataCollection.o: dataCollection.cpp dataCollection.h
 	g++ -g -Wall -std=c++11 -c dataCollection.cpp
