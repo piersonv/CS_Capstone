@@ -16,7 +16,7 @@ int main(int argc, char **argv)
   string imageR = image+"R";
   string imageL = image+"L";
   string smallerImage;
-  string imagedir = "/project/npa/capImages/"; 
+  string imagedir = "/project/piersonv/"; 
   double point[2];
   double * current = new double[9];
   double * best = new double[9];
