@@ -29,15 +29,24 @@ int main(int argc, char **argv)
 	}
  }
 
- Image myimg("test-initial.ppm");
- Image myimgOther("glare.ppm");
+ Image myimg("glare.ppm");
+ Image myimgOther("test-final.ppm");
+best[0] = 1.40546;
+best[1] = 0;
+best[2] = 0.01267;
+best[3] = 0;
+best[4] = 1.14076;
+best[5] = 0.0044;
+best[6] = 0;
+best[7] = 0;
+best[8] = 1;
 
- for(int i=0;i<9;++i){
-		init[i] = current[i] = best[i] = 0; 
+for(int i=0;i<9;++i){
+		init[i] = current[i] = best[i]; 
  }
-  	init[8] = current[8] = best[8] = 1;
-  	init[0] = current[0] = best[0] = 1;
-  	init[4] = current[4] = best[4] = 1;
+//  	init[8] = current[8] = best[8] = 1;
+//  	init[0] = current[0] = best[0] = 1;
+//  	init[4] = current[4] = best[4] = 1;
   
 
 Color red(255,0,0);
@@ -46,13 +55,14 @@ Color blue(0,0,100);
 Image imgInitial = myimg;
 Image src = myimgOther;
 
-for(unsigned int i=0; i<interior.size(); ++i){
-   homography(interior[i].x, interior[i].y, current, point);
-   PixelLoc loc((int)point[0], (int)point[1]);
-   if(inImage(&imgInitial,loc)){
-       imgInitial.setPixel(loc,blue);
-   }
-}
+printHomographyTile("initial",&imgInitial,interior,current);
+//for(unsigned int i=0; i<interior.size(); ++i){
+//   homography(interior[i].x, interior[i].y, current, point);
+//   PixelLoc loc((int)point[0], (int)point[1]);
+//   if(inImage(&imgInitial,loc)){
+//       imgInitial.setPixel(loc,blue);
+//   }
+//}
 
 string imagename = "TileImages/test_initial.ppm";
 imgInitial.print(imagename.c_str());
@@ -79,7 +89,7 @@ if(optimize){
  cout << endl;
 Image imgFinal = myimg;
 
-printHomographyTile(&imgFinal,&imgInitial,interior,best);
+printHomographyTile("final",&imgFinal,interior,best);
 system("/home/mscs/bin/show src.ppm initial.ppm final.ppm");
 imagename = "TileImages/test_final.ppm";
 imgFinal.print(imagename.c_str());
